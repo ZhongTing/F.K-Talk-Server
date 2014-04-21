@@ -1,3 +1,13 @@
+var mysql = require('mysql');
+  var connection = mysql.createConnection({
+      host: '140.124.181.7',
+      port: '2819',
+      user: 'ISLab1221',
+      password: '1221',
+      database: 'fktalk'
+  });
+  connection.connect();
+
 function start(response, postData) {
   console.log("Request handler 'start' was called.");
 
@@ -26,5 +36,25 @@ function upload(response, postData) {
   response.end();
 }
 
+function signup(response, postData)
+{
+  console.log(postData);
+  response.end();
+}
+
+function login(response)
+{
+  connection.query('SELECT * FROM  user',function(error, results, fields){
+      if(error){
+          throw error;
+      }
+      response.writeHead(200, {"Content-Type": "text/plain"});
+      console.log(results);
+      response.end();
+  });
+}
+
 exports.start = start;
 exports.upload = upload;
+exports.login = login;
+exports.signup = signup;
