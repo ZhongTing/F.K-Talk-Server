@@ -4,7 +4,9 @@ F.K-Talk-Server
 行動網路應用與設計期中專案
 
 api
+
 /signup
+
       phone : 'phone',
       password : 'password',
       name : 'name',
@@ -14,6 +16,7 @@ api
     error "signup failed"
     
 /login
+
       phone : 'phone'
       password : 'password'
       
@@ -21,3 +24,8 @@ api
     error "login failed : wrong password"
     error "login failed : phone not found"
 
+
+/addFriend
+
+
+/listFriend
