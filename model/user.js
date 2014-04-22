@@ -22,18 +22,31 @@ function signup(response,data)
 
 function login(response, data)
 {
-  var password = bcrypt.hashSync(data.password);
-  connection.query('SELECT token FROM user WHERE phone = ??, password = ?',data.phone, password ,function(error, results, fields){
+  var sql = 'SELECT token,password FROM user WHERE phone = ?';
+  connection.query(sql ,[data.phone], function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
       if(error){
       	response.write("error");
       	response.end();
       	return;
       }
-      console.log(results);
+      if(results.length!=0)
+      {
+        if(bcrypt.compareSync(data.password,results[0].password))
+        {
+          response.write(results[0].token);
+        }
+        else
+        {
+          response.write("login failed : wrong password");
+        }
+      }
+      else
+      {
+        response.write("login failed : phone not found");
+      }
       response.end();
   });
-  response.end();
 }
 
 function checkAccount(data)

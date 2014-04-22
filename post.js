@@ -12,6 +12,7 @@ var options = {
     host: 'localhost',
     port: 8888,
     path: '/login',
+    // path: '/signup',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
