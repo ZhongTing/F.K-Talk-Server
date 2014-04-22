@@ -15,18 +15,23 @@ api
       phone : 'phone',
       password : 'password',
       name : 'name',
-      mail : 'mail'
-      token : 'token'
+      mail : 'mail',
+      token : 'token',
+      gcmRegId : '12345'
     
-    return token
+    return {name, phone, mail, token, picture}
     error "signup failed"
+    error "retrieve user info error"
     
 /login
 
       phone : 'phone'
       password : 'password'
+      gcmRegId : '12345'
+
       
-    return token
+    return {name, phone, mail, token, picture}
+    error "login failed"
     error "login failed : wrong password"
     error "login failed : phone not found"
 
