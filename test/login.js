@@ -4,15 +4,13 @@ var http = require("http");
 var data = querystring.stringify({
       phone : '0987103180',
       password : 'a1234',
-      name : '謝宗廷',
-      mail : 'gary62107@gmail.com'
+      gcmRegId : '1234560'
     });
 
 var options = {
     host: 'localhost',
     port: 8888,
     path: '/login',
-    // path: '/signup',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

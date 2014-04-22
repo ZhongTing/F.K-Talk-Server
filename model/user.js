@@ -3,62 +3,80 @@ var connection = db.connection;
 var bcrypt = require("bcrypt-nodejs");
 var uuid = require('node-uuid');
 
+function errorResponse(response, errorMsg)
+{
+  var responseData = {};
+  responseData.errorMsg = errorMsg;
+  response.write(JSON.stringify(responseData));
+  response.end();
+}
+
 function signup(response,data)
 {
-  console.log(data);
+  var responseData = {};
   data.password = bcrypt.hashSync(data.password);
   data.token = uuid.v1();
+  gcmRegId = data.gcmRegId;
+  delete data.gcmRegId;
+
   connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
-      if(error){
-      	response.write("signup failed");
-      	response.end();
-      	return;
+      if(error)return errorResponse(response,"signup failed");
+      var querySQL = "SELECT name, phone, mail, token, picture FROM user WHERE uid = ?";
+      // var insertData = {};
+      // insertData.gcmRegId = gcmRegId;
+      // insertData.uid = results.insertId;
+      try
+      {
+        insertGCM({"gcmRegId":gcmRegId,"uid":results.insertId},function(){
+          connection.query(querySQL, results.insertId,function(error, results){
+            if(error)return errorResponse(response,"retrieve user info error")
+            response.write(JSON.stringify(results));
+            response.end();
+          });
+        });
       }
-      console.log(data.token);
-      response.end();
+      catch(error)
+      {
+        return errorResponse(response, "insert gcmRegId failed")
+      }
   });
 }
 
+function insertGCM(insertData, onSuccess)
+{
+  var insertGcmSQL = "INSERT INTO gcm SET ?";
+  connection.query(insertGcmSQL,insertData,function(error, result){
+    if (error) {throw error};
+      onSuccess();
+  });
+}
 function login(response, data)
 {
-  var sql = 'SELECT token,password FROM user WHERE phone = ?';
+  var responseData = {};
+  var sql = 'SELECT uid, name, phone, mail, token, picture, password FROM user WHERE phone = ?';
   connection.query(sql ,[data.phone], function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
-      if(error){
-      	response.write("error");
-      	response.end();
-      	return;
-      }
+      if(error)return errorResponse(response,"login failed");
       if(results.length!=0)
       {
         if(bcrypt.compareSync(data.password,results[0].password))
         {
-          response.write(results[0].token);
+          try{
+            insertGCM({"gcmRegId":data.gcmRegId,"uid":results[0].uid});
+          }
+          catch(error){
+            console.log(error);
+          }
+          delete results[0].uid;
+          response.write(JSON.stringify(results[0]));
+          response.end();
         }
-        else
-        {
-          response.write("login failed : wrong password");
-        }
+        else return errorResponse(response, "wrong password");
       }
-      else
-      {
-        response.write("login failed : phone not found");
-      }
-      response.end();
-  });
-}
-
-function checkAccount(data)
-{
-  connection.query('SELECT * FROM  user',function(error, results, fields){
-      if(error){
-          throw error;
-      }
-      console.log(results);
+      else return errorResponse(response, "phone not found");
   });
 }
 
 exports.signup = signup;
 exports.login = login;
-exports.checkAccount = checkAccount;

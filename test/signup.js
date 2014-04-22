@@ -12,8 +12,7 @@ var data = querystring.stringify({
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/login',
-    // path: '/signup',
+    path: '/signup',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -24,7 +23,7 @@ var options = {
 var req = http.request(options, function(res) {
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
-        console.log("body: " + chunk);
+        console.log(chunk);
     });
 });
 
