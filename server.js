@@ -1,5 +1,7 @@
 var http = require("http");
 var url = require("url");
+var urlencode = require("urlencode");
+var querystring = require("querystring")
 
 function start(route, handle) {
   function onRequest(request, response) {
@@ -16,6 +18,8 @@ function start(route, handle) {
     });
 
     request.addListener("end", function() {
+      postData = urlencode.decode(postData);
+      postData = querystring.parse(postData);
       route(handle, pathname, response, postData);
     });
 

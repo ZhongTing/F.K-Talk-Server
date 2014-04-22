@@ -2,14 +2,16 @@ var querystring = require('querystring');
 var http = require("http");
 
 var data = querystring.stringify({
-      name : 'keming',
-      password : 1234,
+      phone : '0987103180',
+      password : 'a1234',
+      name : '謝宗廷',
+      mail : 'gary62107@gmail.com'
     });
 
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/signup',
+    path: '/login',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
