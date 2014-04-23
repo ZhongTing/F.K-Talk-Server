@@ -24,10 +24,7 @@ function signup(response,data)
   connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
       if(error)return errorResponse(response,"signup failed");
-      var querySQL = "SELECT name, phone, mail, token, picture FROM user WHERE uid = ?";
-      // var insertData = {};
-      // insertData.gcmRegId = gcmRegId;
-      // insertData.uid = results.insertId;
+      var querySQL = "SELECT name, phone, mail, token, photo FROM user WHERE uid = ?";
       try
       {
         insertGCM({"gcmRegId":gcmRegId,"uid":results.insertId},function(){
@@ -89,6 +86,7 @@ function uploadPhoto(response, postData)
   connection.query(sql,[postData.photo,postData.token],function(error, results, fields){
     response.writeHead(200, {"Content-Type": "text/plain"});
       if(error)return errorResponse(response,"uploadPhoto failed");
+      response.write("{}");
       response.end();
   });
 }

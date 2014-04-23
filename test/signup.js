@@ -6,7 +6,8 @@ var data = querystring.stringify({
       password : 'a1234',
       name : '謝宗廷',
       mail : 'gary62107@gmail.com',
-      gcmRegId : '1234560'
+      gcmRegId : '1234560',
+      photo : '1235345'
     });
 
 var options = {

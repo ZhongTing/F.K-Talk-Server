@@ -16,10 +16,10 @@ api
       password : 'password',
       name : 'name',
       mail : 'mail',
-      token : 'token',
       gcmRegId : '12345'
+      photo : '',
     
-    return {name, phone, mail, token, picture}
+    return {name, phone, mail, token, photo}
     error "signup failed"
     error "retrieve user info error"
     
@@ -30,12 +30,18 @@ api
       gcmRegId : '12345'
 
       
-    return {name, phone, mail, token, picture}
+    return {name, phone, mail, token, photo}
     error "login failed"
     error "login failed : wrong password"
     error "login failed : phone not found"
 
+/uploadPhoto
 
+      token
+      photo
+
+    return {};
+    error "uploadPhoto failed"
 /addFriend
 
 
