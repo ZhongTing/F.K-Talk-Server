@@ -2,8 +2,6 @@ var db = require("./db");
 var connection = db.connection;
 var bcrypt = require("bcrypt-nodejs");
 var uuid = require('node-uuid');
-var fs = require("fs");
-var formidable = require("formidable"); 
 
 function errorResponse(response, errorMsg)
 {
