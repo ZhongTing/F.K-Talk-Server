@@ -18,8 +18,11 @@ function start(route, handle) {
     });
 
     request.addListener("end", function() {
-      postData = urlencode.decode(postData);
-      postData = querystring.parse(postData);
+      // postData = urlencode.decode(postData);
+      // postData = querystring.parse(postData);
+      postData = JSON.parse(postData);
+      console.log("postData");
+      console.log(postData);
       route(handle, pathname, response, postData);
     });
 

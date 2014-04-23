@@ -21,7 +21,8 @@ function signup(response,data)
 
   connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
-      if(error)return errorResponse(response,"signup failed");
+      // if(error)return errorResponse(response,"signup failed");
+      if(error)throw error;
       var querySQL = "SELECT name, phone, mail, token, photo FROM user WHERE uid = ?";
       try
       {
