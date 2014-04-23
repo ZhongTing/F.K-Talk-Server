@@ -12,28 +12,53 @@ function addFriend(response, postData)
 		var sql2 = "INSERT INTO friend (selfUid,friendUid) SELECT uid, ? FROM user WHERE phone = ?;";
 		response.writeHead(200, {"Content-Type": "text/plain"});
 		if(error || result.length == 0)return common.errorResponse(response, "token error");
-		insert(sql, [result[0].uid,postData.phone], function(){
-			insert(sql2, [result[0].uid,postData.phone], function(){
-				response.write("{}");
-				response.end();
-			})
+		
+		connection.beginTransaction(function(error){
+			if(error)return common.errorResponse(response, "add friend failed");
+			insert(sql, [result[0].uid,postData.phone], function(){
+				insert(sql2, [result[0].uid,postData.phone], function(){
+					connection.commit(function(err) {
+						if (err) { 
+							connection.rollback(function() {
+								throw err;
+							});
+						}
+						response.write("{}");
+						response.end();
+					});
+				})
+			});	
 		});
+
+		// insert(sql, [result[0].uid,postData.phone], function(){
+		// 	insert(sql2, [result[0].uid,postData.phone], function(){
+		// 		response.write("{}");
+		// 		response.end();
+		// 	})
+		// });
 
 		function insert(sql, insertData, callback)
 		{
+			var errorMsg = "";
 			connection.query(sql, insertData, function(error, result)
 			{
 				if(error)
 				{
 					if(error.toString().match("ER_DUP_ENTRY: Duplicate entry .*? for key 'PRIMARY")!=null)
 					{
-						return common.errorResponse(response, "already be friends");
+						errorMsg = "already be friends";
 					}
-					return common.errorResponse(response, "add friend failed");
+					else errorMsg = "add friend failed";
 				}
-				if(result.affectedRows==0)
+				if(result&&result.affectedRows==0)
 				{
-					return common.errorResponse(response, "phone not found");
+					errorMsg = "phone not found";
+				}
+				if(errorMsg)
+				{
+					return connection.rollback(function() {
+						common.errorResponse(response, errorMsg);
+					});
 				}
 				callback();
 			})
