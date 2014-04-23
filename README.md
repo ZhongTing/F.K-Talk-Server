@@ -70,6 +70,10 @@ api
       token
 
     return {timestamp};
+    error "token error"
+    error "message empty"
+    error "phone not found"
+    error "sendMsg failed"
 
 
 /readMsg
