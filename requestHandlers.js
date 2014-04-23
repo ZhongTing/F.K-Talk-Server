@@ -1,5 +1,3 @@
-var user = require("./model/user");
-
 function start(response, postData) {
   console.log("Request handler 'start' was called.");
 
@@ -21,23 +19,4 @@ function start(response, postData) {
     response.end();
 }
 
-function signup(response, postData)
-{
-  user.signup(response,postData);
-}
-
-function login(response, postData)
-{
-  user.login(response,postData);
-}
-
-function uploadPhoto(response, postData)
-{
-  user.uploadPhoto(response, postData);
-}
-
 exports.start = start;
-exports.upload = upload;
-exports.login = login;
-exports.signup = signup;
-exports.uploadPhoto = uploadPhoto;

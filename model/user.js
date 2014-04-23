@@ -52,7 +52,7 @@ function insertGCM(insertData, onSuccess)
 function login(response, data)
 {
   var responseData = {};
-  var sql = 'SELECT uid, name, phone, mail, token, picture, password FROM user WHERE phone = ?';
+  var sql = 'SELECT uid, name, phone, mail, token, photo, password FROM user WHERE phone = ?';
   connection.query(sql ,[data.phone], function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
       if(error)return errorResponse(response,"login failed");
@@ -80,7 +80,7 @@ function uploadPhoto(response, postData)
 {
   console.log(postData.token);
   console.log(postData.photo.length);
-  var sql = "UPDATE user SET picture = ? WHERE token = ? LIMIT 1 ; ";
+  var sql = "UPDATE user SET photo = ? WHERE token = ? LIMIT 1 ; ";
   connection.query(sql,[postData.photo,postData.token],function(error, results, fields){
     response.writeHead(200, {"Content-Type": "text/plain"});
       if(error)return errorResponse(response,"uploadPhoto failed");
