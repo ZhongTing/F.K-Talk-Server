@@ -1,7 +1,6 @@
-var querystring = require('querystring');
 var http = require("http");
 
-var data = querystring.stringify({
+var data = JSON.stringify({
       phone : '0987103180',
       password : 'a1234',
       gcmRegId : '1234560'

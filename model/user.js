@@ -21,15 +21,15 @@ function signup(response,data)
 
   connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
 	  response.writeHead(200, {"Content-Type": "text/plain"});
-      // if(error)return errorResponse(response,"signup failed");
-      if(error)throw error;
+      if(error)return errorResponse(response,"signup failed");
+      // if(error)throw error;
       var querySQL = "SELECT name, phone, mail, token, photo FROM user WHERE uid = ?";
       try
       {
         insertGCM({"gcmRegId":gcmRegId,"uid":results.insertId},function(){
           connection.query(querySQL, results.insertId,function(error, results){
-            if(error)return errorResponse(response,"retrieve user info error")
-            response.write(JSON.stringify(results));
+            if(error || results.length==0)return errorResponse(response,"retrieve user info error")
+            response.write(JSON.stringify(results[0]));
             response.end();
           });
         });
@@ -61,13 +61,18 @@ function login(response, data)
       {
         if(bcrypt.compareSync(data.password,results[0].password))
         {
-          try{
-            insertGCM({"gcmRegId":data.gcmRegId,"uid":results[0].uid});
+          try
+          {
+            if(data.gcmRegId)
+            {
+              insertGCM({"gcmRegId":data.gcmRegId,"uid":results[0].uid});  
+            }
           }
           catch(error){
             console.log(error);
           }
           delete results[0].uid;
+          delete results[0].password;
           response.write(JSON.stringify(results[0]));
           response.end();
         }
