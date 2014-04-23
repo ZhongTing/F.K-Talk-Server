@@ -2,7 +2,7 @@ var server = require("./server");
 var router = require("./router");
 var requestHandlers = require("./requestHandlers");
 var user = require("./model/user");
-var friend = require("./model/friend");
+var friend = require("./model/friends");
 
 var handle = {}
 handle["/"] = requestHandlers.start;

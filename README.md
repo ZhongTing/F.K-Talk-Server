@@ -50,7 +50,10 @@ api
       phone    
 
     return {};
-
+    error "token error"
+    error "already be friends"
+    error "add friend failed"
+    error "phone not found"
 
 /listFriend
       

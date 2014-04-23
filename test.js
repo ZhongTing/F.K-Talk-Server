@@ -1,5 +1,1 @@
-
-var a = {};
-a.v = null;
-if(a.v)
-console.log(a.v);
+SELECT * FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token =  "c295e0e0-ca9f-11e3-b" ) AS b ) AS c NATURAL JOIN user LIMIT 0 , 30

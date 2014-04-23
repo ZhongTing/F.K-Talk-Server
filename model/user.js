@@ -2,14 +2,7 @@ var db = require("./db");
 var connection = db.connection;
 var bcrypt = require("bcrypt-nodejs");
 var uuid = require('node-uuid');
-
-function errorResponse(response, errorMsg)
-{
-    var responseData = {};
-    responseData.errorMsg = errorMsg;
-    response.write(JSON.stringify(responseData));
-    response.end();
-}
+var common = require('./common');
 
 function signup(response,data)
 {
@@ -21,14 +14,14 @@ function signup(response,data)
 
     connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
         response.writeHead(200, {"Content-Type": "text/plain"});
-        if(error)return errorResponse(response,"signup failed");
-        // if(error)throw error;
+        // if(error)return common.errorResponse(response,"signup failed");
+        if(error)throw error;
         var querySQL = "SELECT name, phone, mail, token, photo FROM user WHERE uid = ?";
         try
         {
             insertGCM({"gcmRegId":gcmRegId,"uid":results.insertId},function(){
             connection.query(querySQL, results.insertId,function(error, results){
-            if(error || results.length==0)return errorResponse(response,"retrieve user info error")
+            if(error || results.length==0)return common.errorResponse(response,"retrieve user info error")
                 response.write(JSON.stringify(results[0]));
                 response.end();
                 });
@@ -36,7 +29,7 @@ function signup(response,data)
         }
         catch(error)
         {
-        return errorResponse(response, "insert gcmRegId failed")
+        return common.errorResponse(response, "insert gcmRegId failed")
         }
     });
 }
@@ -56,7 +49,7 @@ function login(response, data)
     var sql = 'SELECT uid, name, phone, mail, token, photo, password FROM user WHERE phone = ?';
     connection.query(sql ,[data.phone], function(error, results, fields){
         response.writeHead(200, {"Content-Type": "text/plain"});
-        if(error)return errorResponse(response,"login failed");
+        if(error)return common.errorResponse(response,"login failed");
         if(results.length!=0)
         {
             if(bcrypt.compareSync(data.password,results[0].password))
@@ -76,9 +69,9 @@ function login(response, data)
                 response.write(JSON.stringify(results[0]));
                 response.end();
             }
-            else return errorResponse(response, "wrong password");
+            else return common.errorResponse(response, "wrong password");
         }
-        else return errorResponse(response, "phone not found");
+        else return common.errorResponse(response, "phone not found");
     });
 }
 
@@ -89,17 +82,19 @@ function uploadPhoto(response, postData)
     var sql = "UPDATE user SET photo = ? WHERE token = ? LIMIT 1 ; ";
     connection.query(sql,[postData.photo,postData.token],function(error, results, fields){
         response.writeHead(200, {"Content-Type": "text/plain"});
-        if(error)return errorResponse(response,"uploadPhoto failed");
+        if(error)return common.errorResponse(response,"uploadPhoto failed");
         response.write("{}");
         response.end();
     });
 }
 
-function getUid(token)
+function getUid(token, callback)
 {
-
+    var sql = "SELECT uid FROM user WHERE token = ?";
+    connection.query(sql, token, callback);
 }
 
 exports.signup = signup;
 exports.login = login;
 exports.uploadPhoto = uploadPhoto;
+exports.getUid = getUid;
