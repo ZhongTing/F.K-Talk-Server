@@ -60,6 +60,7 @@ api
       token
 
     return {friends:[{name,phone,photo,mail}]};
+    error "token error"
 
 
 /sendMsg
