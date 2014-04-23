@@ -2,6 +2,8 @@ var db = require("./db");
 var connection = db.connection;
 var bcrypt = require("bcrypt-nodejs");
 var uuid = require('node-uuid');
+var fs = require("fs");
+var formidable = require("formidable"); 
 
 function errorResponse(response, errorMsg)
 {
@@ -51,6 +53,7 @@ function insertGCM(insertData, onSuccess)
       onSuccess();
   });
 }
+
 function login(response, data)
 {
   var responseData = {};
@@ -78,5 +81,18 @@ function login(response, data)
   });
 }
 
+function uploadPhoto(response, postData)
+{
+  console.log(postData.token);
+  console.log(postData.photo.length);
+  var sql = "UPDATE user SET picture = ? WHERE token = ? LIMIT 1 ; ";
+  connection.query(sql,[postData.photo,postData.token],function(error, results, fields){
+    response.writeHead(200, {"Content-Type": "text/plain"});
+      if(error)return errorResponse(response,"uploadPhoto failed");
+      response.end();
+  });
+}
+
 exports.signup = signup;
 exports.login = login;
+exports.uploadPhoto = uploadPhoto;

@@ -38,7 +38,13 @@ function login(response, postData)
   user.login(response,postData);
 }
 
+function uploadPhoto(response, postData)
+{
+  user.uploadPhoto(response, postData);
+}
+
 exports.start = start;
 exports.upload = upload;
 exports.login = login;
 exports.signup = signup;
+exports.uploadPhoto = uploadPhoto;
