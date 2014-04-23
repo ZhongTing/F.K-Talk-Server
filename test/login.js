@@ -1,10 +1,10 @@
 var http = require("http");
 
 var data = JSON.stringify({
-      phone : '0987103180',
-      password : 'a1234',
-      gcmRegId : '1234560'
-    });
+    phone : '0987103180',
+    password : 'a1234',
+    gcmRegId : '1234560'
+});
 
 var options = {
     host: 'localhost',

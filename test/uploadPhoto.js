@@ -2,9 +2,9 @@ var base = "/9j/4AAQSkZJRgABAgAAAQABAAD//gAEKgD/4gIcSUNDX1BST0ZJTEUAAQEAAAIMbGNt
 var http = require("http");
 
 var data = JSON.stringify({
-      token : 'bbe9f3c0-ca46-11e3-a',
-      photo : base
-    });
+    token : 'bbe9f3c0-ca46-11e3-a',
+    photo : base
+});
 
 var options = {
     host: 'localhost',
