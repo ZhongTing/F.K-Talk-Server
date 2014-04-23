@@ -42,7 +42,43 @@ api
 
     return {};
     error "uploadPhoto failed"
+
+
 /addFriend
+    
+      token
+      phone    
+
+    return {};
 
 
 /listFriend
+      
+      token
+
+    return {friends:[{name,phone,photo,mail}]};
+
+
+/sendMsg
+      
+      phone
+      message
+      token
+
+    return {timestamp};
+
+
+/readMsg
+      phone
+      token
+
+    return {timestamp}
+
+
+/listMsg
+      phone
+      token
+      timestamp
+
+    return {msgs:[msg,timestamp]}
+
