@@ -3,6 +3,7 @@ var db = require('./db');
 var common =require('./common');
 var user = require('./user');
 var connection = db.connection;
+var gcm = require("../model/gcmService");
 
 function sendMsg(response, postData)
 {
@@ -64,8 +65,18 @@ function sendMsg(response, postData)
     	}
     	function gcmhere()
     	{
-
-    	}
+            var sql = "SELECT `gcmRegId` FROM gcm natural join user where phone = ?"
+            connection.query(sql, [postData.phone], function(error, result){
+                if(error) return common.errorResponse(response, "sendGCM failed");
+                if(result.length == 0) return common.errorResponse(response, "phone not found");
+                var id = result[0].gcmRegId;
+                var message = {
+                    collapse_key: 'Collapse key', 
+                    data : {message : postData.message}
+                };
+                gcm.send(id,message);
+            })
+        }
     })
 }
 
