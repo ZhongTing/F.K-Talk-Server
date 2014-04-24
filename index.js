@@ -16,6 +16,7 @@ handle["/listFriend"] = friend.listFriend;
 handle["/sendMsg"] = message.sendMsg;
 handle["/readMsg"] = message.readMsg;
 handle["/listMsg"] = message.listMsg;
+handle["/getFriendRead"] = message.getFriendRead;
 var os=require('os');
 var ifaces=os.networkInterfaces();
 for (var dev in ifaces) {

@@ -131,6 +131,21 @@ function listMsg(response, postData)
     }
 }
 
+function getFriendRead(response, postData)
+{
+    var sql = "SELECT UNIX_TIMESTAMP(readTime) as readTime FROM friend WHERE friendUid IN ( SELECT uid FROM user WHERE token = ? ) AND selfUId IN ( SELECT uid FROM user WHERE phone =?)";
+    var data = [postData.token,postData.phone];
+    connection.query(sql, data, function(error,result){
+        // if(error) return common.errorResponse(response, JSON.stringify(error));
+        if(error) throw error;
+        if(result.length==0) return common.errorResponse(response, "get friend read failed");
+        response.write(JSON.stringify(result[0]));
+        response.end();
+    })
+
+}
+
 exports.sendMsg = sendMsg;
 exports.readMsg = readMsg;
 exports.listMsg = listMsg;
+exports.getFriendRead = getFriendRead;

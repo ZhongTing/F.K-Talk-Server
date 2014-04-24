@@ -93,3 +93,13 @@ api
     return {msgs:[name, phone, msg,timestamp]}    //unixtimestamp
     error "token error"
     error "sql error" (直接丟出sql error)
+
+/getFriendRead
+      phone
+      token
+
+    return {"readTime"}
+    error "sql error"
+    error "get friend read failed"
+
+    
