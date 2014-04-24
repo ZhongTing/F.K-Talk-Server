@@ -59,7 +59,7 @@ api
       
       token
 
-    return {friends:[{name,phone,photo,mail}]};
+    return {friends:[{name,phone,photo,mail,readTime}]}; //readTime是指朋友已讀自己的訊息時間
     error "token error"
 
 

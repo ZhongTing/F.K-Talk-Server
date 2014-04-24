@@ -35,7 +35,7 @@ function sendMsg(response, postData)
     	}
     	function queryTimeStamp(messageId)
     	{
-    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp from message WHERE mid = " + messageId;
+    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp , phone from message,user WHERE message.senderUID = user.uid and  mid = " + messageId;
     		if(error)
     		{
     			connection.rollback(function(){
@@ -56,37 +56,29 @@ function sendMsg(response, postData)
 							throw err;
 						});
 					}
-					gcmhere();
+                    var m = gcm.newMsg();
+                    var message = "from:"+result[0].phone + "-" + postData.message;
+                    m.addData("message",message);
+                    console.log(message);
+                    gcm.sendByPhone(0961276368,m);
                     console.log(result);
 					response.write(JSON.stringify(result[0]));
 					response.end();
 				});
     		})
     	}
-    	function gcmhere()
-    	{
-            var sql = "SELECT `gcmRegId` FROM gcm natural join user where phone = ?"
-            connection.query(sql, [postData.phone], function(error, result){
-                if(error) return common.errorResponse(response, "sendGCM failed");
-                if(result.length == 0) return common.errorResponse(response, "phone not found");
-                var id = result[0].gcmRegId;
-                var message = {
-                    collapse_key: 'Collapse key', 
-                    data : {message : postData.message}
-                };
-                gcm.send(id,message);
-            })
-        }
     })
 }
 
 function readMsg(response, postData)
 {
-    user.getUidByToken(postData.token,onGetUid);
+    var selfPhone;
+    user.getUidAndPhoneByToken(postData.token,onGetUid);
     function onGetUid(error, result)
     {
         if(error || result.length == 0)return common.errorResponse(response, "token error");
-        updateReadMsg(result[0].uid);  
+        selfPhone = result[0].phone;
+        updateReadMsg(result[0].uid);
     }
     function updateReadMsg(selfUid)
     {
@@ -96,6 +88,10 @@ function readMsg(response, postData)
         connection.query(sql, data, function(error, result){
             if(error)return common.errorResponse(response, error)
             if(!result&&result.changeRows==0)return common.errorResponse(response, "send read message failed");
+            var m = gcm.newMsg();
+            var message = selfPhone + " read your msg";
+            m.addData("message",message);
+            gcm.sendByPhone(0961276368,m);
             response.write(JSON.stringify({"timestamp":timestamp}));
             response.end();
         })

@@ -1,25 +1,31 @@
-var GCM = require('gcm').GCM;
+var connection = require('./db').connection;
+var gcm = require('node-gcm');
+var sender = new gcm.Sender('AIzaSyBsf4l9d4mpSaT2QH9ybpRd6GccU-367RU');
 
-var apiKey = 'AIzaSyBsf4l9d4mpSaT2QH9ybpRd6GccU-367RU';
-var gcm = new GCM(apiKey);
-
-var message = {
-    collapse_key: 'Collapse key', 
-    'data.key1': 'value1',
-    'data.key2': 'value2',
-    data : {message : "hello"}
-};
 function send(regId,msgObject,callback)
 {
-	console.log(apiKey);
-	msgObject.registration_id = regId;
-	gcm.send(message, function(err, messageId){
-	    if (err) {
-	    	console.log(err);
-	        console.log("Something has gone wrong!");
-	    } else {
-	        console.log("Sent with message ID: ", messageId);
-	    }
+	var registrationIds = [];
+	registrationIds.push(regId);
+	sender.send(msgObject, registrationIds, 4, function (err, result) {
+    	console.log(result);
 	});
 }
+function sendByPhone(phone, msgObject, callback)
+{
+	var sql = "SELECT `gcmRegId` FROM gcm natural join user where phone = ?"
+    connection.query(sql, [phone], function(error, result){
+        if(error) return common.errorResponse(response, "sendGCM failed");
+        if(result.length == 0) return common.errorResponse(response, "phone not found");
+        var id = result[0].gcmRegId;
+        send(id, msgObject, callback);
+    })
+}
+function getMessage()
+{
+	var m = new gcm.Message();
+	m.delayWhileIdle = true;
+	return m;
+}
 exports.send = send;
+exports.sendByPhone = sendByPhone;
+exports.newMsg = getMessage

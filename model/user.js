@@ -107,8 +107,15 @@ function getUidByPhone(phone, callback)
     connection.query(sql, phone, callback);
 }
 
+function getUidAndPhoneByToken(token, callback)
+{
+    var sql = "SELECT uid, phone FROM user WHERE token = ?";
+    connection.query(sql, token, callback);
+}
+
 exports.signup = signup;
 exports.login = login;
 exports.uploadPhoto = uploadPhoto;
 exports.getUidByToken = getUidByToken;
 exports.getUidByPhone = getUidByPhone;
+exports.getUidAndPhoneByToken = getUidAndPhoneByToken;
