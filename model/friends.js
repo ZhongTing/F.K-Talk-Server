@@ -5,7 +5,7 @@ var common = require("./common");
 
 function addFriend(response, postData)
 {
-	user.getUid(postData.token,onGetUid);
+	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
 		var sql = "INSERT INTO friend (selfUid,friendUid) SELECT ?, uid FROM user WHERE phone = ?;";
@@ -68,7 +68,7 @@ function addFriend(response, postData)
 
 function listFriend(response, postData)
 {
-	user.getUid(postData.token,onGetUid);
+	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
 		var sql = "SELECT name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ?) AS b ) AS c NATURAL JOIN user";

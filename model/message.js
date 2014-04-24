@@ -10,7 +10,7 @@ function sendMsg(response, postData)
     {
     	if(error)return common.errorResponse(response, "sendMsg failed")
     	if(postData.message=="")return common.errorResponse(response, "message empty")
-    	user.getUid(postData.token,onGetUid);
+    	user.getUidByToken(postData.token,onGetUid);
 
     	function onGetUid(error, result)
     	{
@@ -34,7 +34,7 @@ function sendMsg(response, postData)
     	}
     	function queryTimeStamp(messageId)
     	{
-    		var sql = "SELECT timestamp from message WHERE mid = " + messageId;
+    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp from message WHERE mid = " + messageId;
     		if(error)
     		{
     			connection.rollback(function(){
@@ -56,10 +56,10 @@ function sendMsg(response, postData)
 						});
 					}
 					gcmhere();
+                    console.log(result);
 					response.write(JSON.stringify(result[0]));
 					response.end();
 				});
-
     		})
     	}
     	function gcmhere()
@@ -71,12 +71,53 @@ function sendMsg(response, postData)
 
 function readMsg(response, postData)
 {
-
+    user.getUidByToken(postData.token,onGetUid);
+    function onGetUid(error, result)
+    {
+        if(error || result.length == 0)return common.errorResponse(response, "token error");
+        updateReadMsg(result[0].uid);  
+    }
+    function updateReadMsg(selfUid)
+    {
+        var sql = "UPDATE friend, ( SELECT uid FROM user WHERE phone = ? ) AS user SET readTime = FROM_UNIXTIME(?) WHERE selfUid = ? AND friendUid = user.uid";
+        var timestamp = Math.round(Date.now()/1000);
+        var data = [postData.phone, timestamp, selfUid];
+        connection.query(sql, data, function(error, result){
+            if(error)return common.errorResponse(response, error)
+            if(!result&&result.changeRows==0)return common.errorResponse(response, "send read message failed");
+            response.write(JSON.stringify({"timestamp":timestamp}));
+            response.end();
+        })
+    }
 }
 
 function listMsg(response, postData)
 {
-
+    var sql = "SELECT name, phone, message, UNIX_TIMESTAMP(timestamp) as timestamp FROM `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID = ? and `senderUID` = ?) or (senderUID = ? and recieverUID = ?)) and timestamp > FROM_UNIXTIME( ? )"
+    var friendUid;
+    var selfUid;
+    user.getUidByToken(postData.token,onGetUid);
+    function onGetUid(error, result)
+    {
+        if(error || result.length == 0)return common.errorResponse(response, "token error");
+        selfUid = result[0].uid;
+        user.getUidByPhone(postData.phone, function(error, result){
+            if(error || result.length == 0)return common.errorResponse(response, "token error");
+            friendUid = result[0].uid
+            queryMsgList();              
+        })
+    }
+    function queryMsgList()
+    {
+        var data = [selfUid, friendUid, selfUid, friendUid, postData.timestamp];
+        console.log(data);
+        connection.query(sql, data, function(error, result){
+            if(error)return common.errorResponse(response, error);
+            // if(error)throw error
+            response.write(JSON.stringify(result));
+            response.end();
+        })
+    }
 }
 
 exports.sendMsg = sendMsg;

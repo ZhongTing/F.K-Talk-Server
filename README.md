@@ -69,7 +69,7 @@ api
       message
       token
 
-    return {timestamp};
+    return {timestamp};     //unixtimestamp
     error "token error"
     error "message empty"
     error "phone not found"
@@ -80,13 +80,16 @@ api
       phone
       token
 
-    return {timestamp}
-
+    return {timestamp}      //unixtimestamp
+    error "token error"
+    error "send read message failed"
+    error "sql error" (直接丟出sql error)
 
 /listMsg
       phone
       token
-      timestamp
+      timestamp     //unixtimestamp
 
-    return {msgs:[msg,timestamp]}
-
+    return {msgs:[name, phone, msg,timestamp]}    //unixtimestamp
+    error "token error"
+    error "sql error" (直接丟出sql error)

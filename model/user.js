@@ -14,8 +14,7 @@ function signup(response,data)
 
     connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
         response.writeHead(200, {"Content-Type": "text/plain"});
-        // if(error)return common.errorResponse(response,"signup failed");
-        if(error)throw error;
+        if(error)return common.errorResponse(response,"signup failed");
         var querySQL = "SELECT name, phone, mail, token, photo FROM user WHERE uid = ?";
         try
         {
@@ -88,13 +87,20 @@ function uploadPhoto(response, postData)
     });
 }
 
-function getUid(token, callback)
+function getUidByToken(token, callback)
 {
     var sql = "SELECT uid FROM user WHERE token = ?";
     connection.query(sql, token, callback);
 }
 
+function getUidByPhone(phone, callback)
+{
+    var sql = "SELECT uid FROM user WHERE phone = ?";
+    connection.query(sql, phone, callback);
+}
+
 exports.signup = signup;
 exports.login = login;
 exports.uploadPhoto = uploadPhoto;
-exports.getUid = getUid;
+exports.getUidByToken = getUidByToken;
+exports.getUidByPhone = getUidByPhone;
