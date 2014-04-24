@@ -57,7 +57,15 @@ function login(response, data)
                 {
                     if(data.gcmRegId)
                     {
-                        insertGCM({"gcmRegId":data.gcmRegId,"uid":results[0].uid})
+                        var updateSQL = "UPDATE gcm AS g, ( SELECT gid FROM gcm WHERE uid = ? ) AS a SET gcmRegId = ? WHERE g.gid = a.gid";
+                        var uid = results[0].uid;
+                        connection.query(updateSQL, [results[0].uid,data.gcmRegId], function(error,results){
+                            if(error) return common.errorResponse(response, JSON.stringify(error));
+                            if(results.affectedRows==0)
+                            {
+                                insertGCM({"gcmRegId":data.gcmRegId,"uid":uid})
+                            }
+                        })
                     }
                 }
                 catch(error){

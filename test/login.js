@@ -3,7 +3,7 @@ var http = require("http");
 var data = JSON.stringify({
     phone : '0987103180',
     password : 'a1234',
-    gcmRegId : '1234560'
+    gcmRegId : '12345630'
 });
 
 var options = {
