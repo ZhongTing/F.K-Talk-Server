@@ -71,10 +71,10 @@ function listFriend(response, postData)
 	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
-		var sql = "SELECT name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ?) AS b ) AS c NATURAL JOIN user";
+		var sql = "SELECT name, phone, photo, mail, UNIX_TIMESTAMP(readTime) as readTime from (SELECT uid, name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ? ) AS b ) AS c NATURAL JOIN user) as leftpart left JOIN friend on leftpart.uid = friend.selfUid and friend.friendUid = ?";
 		response.writeHead(200, {"Content-Type": "text/plain"});
 		if(error || result.length == 0)return common.errorResponse(response, "token error");
-		connection.query(sql,[postData.token],function(error,results){
+		connection.query(sql,[postData.token,result[0].uid],function(error,results){
 			if (error) {
 				console.log(error);
 				return common.errorResponse(response, "listFriend failed");
