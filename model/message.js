@@ -35,7 +35,7 @@ function sendMsg(response, postData)
     	}
     	function queryTimeStamp(messageId)
     	{
-    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp , phone from message,user WHERE message.senderUID = user.uid and  mid = " + messageId;
+    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp , name from message,user WHERE message.senderUID = user.uid and  mid = " + messageId;
     		if(error)
     		{
     			connection.rollback(function(){
@@ -57,9 +57,8 @@ function sendMsg(response, postData)
 						});
 					}
                     var m = gcm.newMsg();
-                    var message = "from:"+result[0].phone + "-" + postData.message;
+                    var message = result[0].name + ":" + postData.message;
                     m.addData("message",message);
-                    console.log(message);
                     gcm.sendByPhone(0961276368,m);
                     console.log(result);
 					response.write(JSON.stringify(result[0]));
@@ -89,7 +88,7 @@ function readMsg(response, postData)
             if(error)return common.errorResponse(response, error)
             if(!result&&result.changeRows==0)return common.errorResponse(response, "send read message failed");
             var m = gcm.newMsg();
-            var message = selfPhone + " read your msg";
+            var message = "{"+selfPhone + ":" + timestamp+"}";
             m.addData("message",message);
             gcm.sendByPhone(0961276368,m);
             response.write(JSON.stringify({"timestamp":timestamp}));
