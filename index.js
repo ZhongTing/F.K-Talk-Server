@@ -16,5 +16,15 @@ handle["/listFriend"] = friend.listFriend;
 handle["/sendMsg"] = message.sendMsg;
 handle["/readMsg"] = message.readMsg;
 handle["/listMsg"] = message.listMsg;
-
+var os=require('os');
+var ifaces=os.networkInterfaces();
+for (var dev in ifaces) {
+  var alias=0;
+  ifaces[dev].forEach(function(details){
+    if (details.family=='IPv4') {
+      console.log(dev+(alias?':'+alias:''),details.address);
+      ++alias;
+    }
+  });
+}
 server.start(router.route, handle);
