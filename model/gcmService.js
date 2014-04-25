@@ -7,6 +7,7 @@ function send(regId,msgObject,callback)
 	var registrationIds = [];
 	registrationIds.push(regId);
 	sender.send(msgObject, registrationIds, 4, function (err, result) {
+    	console.log(msgObject);
     	console.log(result);
 	});
 }
@@ -26,6 +27,7 @@ function getMessage()
 	m.delayWhileIdle = true;
 	return m;
 }
+
 exports.send = send;
 exports.sendByPhone = sendByPhone;
 exports.newMsg = getMessage

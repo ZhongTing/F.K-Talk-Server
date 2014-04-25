@@ -71,12 +71,12 @@ function sendMsg(response, postData)
 
 function readMsg(response, postData)
 {
-    var selfPhone;
-    user.getUidAndPhoneByToken(postData.token,onGetUid);
+    var selfName;
+    user.getUidAndNameByToken(postData.token,onGetUid);
     function onGetUid(error, result)
     {
         if(error || result.length == 0)return common.errorResponse(response, "token error");
-        selfPhone = result[0].phone;
+        selfName = result[0].name;
         updateReadMsg(result[0].uid);
     }
     function updateReadMsg(selfUid)
@@ -88,8 +88,9 @@ function readMsg(response, postData)
             if(error)return common.errorResponse(response, error)
             if(!result&&result.changeRows==0)return common.errorResponse(response, "send read message failed");
             var m = gcm.newMsg();
-            var message = "{"+selfPhone + ":" + timestamp+"}";
-            m.addData("message",message);
+            var message = selfName + "已讀你的訊息";
+            m.addData("readtime", timestamp);
+            m.addData("message", message);
             gcm.sendByPhone(0961276368,m);
             response.write(JSON.stringify({"timestamp":timestamp}));
             response.end();
