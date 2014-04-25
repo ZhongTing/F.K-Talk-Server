@@ -1,0 +1,11 @@
+{
+ "name": "fktalk-server",
+ "version": "0.0.1",
+ "private": true,
+ "dependencies": {
+	"node-gcm":"",
+	"bcrypt-nodejs":"",
+	"node-uuid":"",
+	"mysql":""
+ }
+}

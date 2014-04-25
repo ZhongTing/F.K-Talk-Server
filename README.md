@@ -6,7 +6,6 @@ module
 
       mysql
       node-uuid
-      urlencode
       bcrypt-nodejs
 api
 
