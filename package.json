@@ -7,5 +7,6 @@
 	"bcrypt-nodejs":"",
 	"node-uuid":"",
 	"mysql":""
- }
+ },
+ "scripts": {"start": "node index.js"}
 }
