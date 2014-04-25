@@ -59,7 +59,7 @@ function sendMsg(response, postData)
                     var m = gcm.newMsg();
                     var message = result[0].name + ":" + postData.message;
                     m.addData("message",message);
-                    gcm.sendByPhone(0961276368,m);
+                    gcm.sendByPhone(postData.phone,m);
                     console.log(result);
 					response.write(JSON.stringify(result[0]));
 					response.end();
@@ -91,7 +91,7 @@ function readMsg(response, postData)
             var message = selfName + "已讀你的訊息";
             m.addData("readtime", JSON.stringify({selfName:timestamp}));
             m.addData("message", message);
-            gcm.sendByPhone(0961276368,m);
+            gcm.sendByPhone(postData.phone,m);
             response.write(JSON.stringify({"timestamp":timestamp}));
             response.end();
         })
