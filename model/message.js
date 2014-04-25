@@ -89,7 +89,7 @@ function readMsg(response, postData)
             if(!result&&result.changeRows==0)return common.errorResponse(response, "send read message failed");
             var m = gcm.newMsg();
             var message = selfName + "已讀你的訊息";
-            m.addData("readtime", timestamp);
+            m.addData("readtime", JSON.stringify({selfName:timestamp}));
             m.addData("message", message);
             gcm.sendByPhone(0961276368,m);
             response.write(JSON.stringify({"timestamp":timestamp}));
