@@ -35,7 +35,7 @@ function sendMsg(response, postData)
     	}
     	function queryTimeStamp(messageId)
     	{
-    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp , name from message,user WHERE message.senderUID = user.uid and  mid = " + messageId;
+    		var sql = "SELECT UNIX_TIMESTAMP(timestamp) as timestamp , name, phone from message,user WHERE message.senderUID = user.uid and  mid = " + messageId;
     		if(error)
     		{
     			connection.rollback(function(){
@@ -58,8 +58,12 @@ function sendMsg(response, postData)
 					}
                     var m = gcm.newMsg();
                     var message = result[0].name + ":" + postData.message;
+                    var newMessageMsg = {};
+                    newMessageMsg[result[0].phone] = postData.message;
+                    m.addData("newmessage", JSON.stringify(newMessageMsg));
                     m.addData("message",message);
                     gcm.sendByPhone(postData.phone,m);
+                    result[0].mid = messageId;
                     console.log(result);
 					response.write(JSON.stringify(result[0]));
 					response.end();
@@ -102,7 +106,7 @@ function readMsg(response, postData)
 
 function listMsg(response, postData)
 {
-    var sql = "SELECT name, phone, message, UNIX_TIMESTAMP(timestamp) as timestamp FROM `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID = ? and `senderUID` = ?) or (senderUID = ? and recieverUID = ?)) and timestamp > FROM_UNIXTIME( ? )"
+    var sql = "SELECT mid, name, phone, message, UNIX_TIMESTAMP(timestamp) as timestamp FROM `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID = ? and `senderUID` = ?) or (senderUID = ? and recieverUID = ?)) and timestamp > FROM_UNIXTIME( ? )"
     var friendUid;
     var selfUid;
     user.getUidByToken(postData.token,onGetUid);
