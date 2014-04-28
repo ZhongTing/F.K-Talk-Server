@@ -63,6 +63,7 @@ function sendMsg(response, postData)
                     m.addData("newmessage", JSON.stringify(newMessageMsg));
                     m.addData("message",message);
                     gcm.sendByPhone(postData.phone,m);
+                    mqtt.publish(result[0].phone,JSON.stringify(m.data));
                     result[0].mid = messageId;
                     console.log(result);
 					response.write(JSON.stringify(result[0]));
@@ -98,6 +99,7 @@ function readMsg(response, postData)
             m.addData("readtime", JSON.stringify(readTimeMsg));
             m.addData("message", message);
             gcm.sendByPhone(postData.phone,m);
+            mqtt.publish(postData.phone, JSON.stringify(m.data));
             response.write(JSON.stringify({"timestamp":timestamp}));
             response.end();
         })
