@@ -1,6 +1,6 @@
 var mqtt = require('mqtt')
 var client = mqtt.createClient(1883, '140.124.183.138');
-var prefix = "FK2-"
+var prefix = "FK2"
 var connectoin = require("./db").connectoin;
 var common = require("./common");
 

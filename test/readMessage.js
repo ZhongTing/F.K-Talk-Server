@@ -1,8 +1,10 @@
 var http = require("http");
 
 var data = JSON.stringify({
-    token : 'c295e0e0-ca9f-11e3-b',
+    token : '7d4ac500-cc57-11e3-a',
     phone : '0961276368',
+    sp : '0987103180',
+    hasReadMsgId : '2'
 });
 
 var options = {

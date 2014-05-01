@@ -76,35 +76,34 @@ function sendMsg(response, postData)
 function readMsg(response, postData)
 {
     var selfName;
-    user.getUidAndNameByToken(postData.token,onGetUid);
+    if(!postData.sp)
+    {
+        response.end();
+        return;
+    }
+    user.getUidByToken(postData.token,onGetUid);
     function onGetUid(error, result)
     {
         if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
-        selfName = result[0].name;
         updateReadMsg(result[0].uid);
     }
     function updateReadMsg(selfUid)
     {
-        var sql = "UPDATE friend, ( SELECT uid FROM user WHERE phone = ? ) AS user SET readTime = FROM_UNIXTIME(?) WHERE selfUid = ? AND friendUid = user.uid";
-        var timestamp = Math.round(Date.now()/1000);
-        var data = [postData.phone, timestamp, selfUid];
+        var sql = "UPDATE friend, ( SELECT uid FROM user WHERE phone = ? ) AS user SET hasReadMsgId = ? WHERE selfUid = ? AND friendUid = user.uid";
+        var data = [postData.phone, postData.hasReadMsgId, selfUid];
         connection.query(sql, data, function(error, result){
             if(error)return mqtt.action(postData.sp,"error", error)
             if(!result&&result.changeRows==0)return mqtt.action(postData.sp,"error", "send read message failed");
-            var m = gcm.newMsg();
-            var message = selfName + "已讀你的訊息";
-            var readTimeMsg = {};
-            readTimeMsg[selfName] = timestamp;
-            m.addData("readtime", JSON.stringify(readTimeMsg));
-            m.addData("message", message);
-            gcm.sendByPhone(postData.phone,m);
-            mqtt.publish(postData.phone, JSON.stringify(m.data));
-            response.write(JSON.stringify({"timestamp":timestamp}));
+            var a = {};
+            a.phone = postData.sp;
+            a.hasReadMsgId = postData.hasReadMsgId;
+            mqtt.action(postData.phone,"hasRead",a);
             response.end();
         })
     }
 }
 
+//unuseless
 function listMsg(response, postData)
 {
     var sql = "SELECT mid, name, phone, message, UNIX_TIMESTAMP(timestamp) as timestamp FROM `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID = ? and `senderUID` = ?) or (senderUID = ? and recieverUID = ?)) and timestamp > FROM_UNIXTIME( ? )"
@@ -133,7 +132,7 @@ function listMsg(response, postData)
         })
     }
 }
-
+//unuseless
 function getFriendRead(response, postData)
 {
     var sql = "SELECT UNIX_TIMESTAMP(readTime) as readTime FROM friend WHERE friendUid IN ( SELECT uid FROM user WHERE token = ? ) AND selfUId IN ( SELECT uid FROM user WHERE phone =?)";
@@ -144,7 +143,6 @@ function getFriendRead(response, postData)
         response.write(JSON.stringify(result[0]));
         response.end();
     })
-
 }
 
 exports.sendMsg = sendMsg;
