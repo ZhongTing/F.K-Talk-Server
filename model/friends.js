@@ -6,6 +6,11 @@ var mqtt = require("./fkmqtt");
 
 function addFriend(response, postData)
 {
+	if(!postData.sp)
+	{
+		response.end();
+		return;
+	}
 	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
@@ -76,6 +81,11 @@ function addFriend(response, postData)
 
 function listFriend(response, postData)
 {
+	if(!postData.sp)
+	{
+		response.end();
+		return;
+	}
 	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
@@ -87,9 +97,9 @@ function listFriend(response, postData)
 			if (error) 
 				// throw error;
 				return mqtt.action(postData.sp, "error", "listFriend failed");
-			return mqtt.action(postData.sp, "listFriend", results);
-			// response.write(JSON.stringify(results));
+			mqtt.action(postData.sp, "listFriend", results);
 			response.end();
+			// response.write(JSON.stringify(results));
 		})
 	}
 }
