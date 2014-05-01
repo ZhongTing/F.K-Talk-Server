@@ -1,3 +1,5 @@
+var mqtt = require("./fkmqtt");
+
 function errorResponse(response, errorMsg)
 {
     var responseData = {};
@@ -6,4 +8,8 @@ function errorResponse(response, errorMsg)
     response.end();
 }
 
+function sendMqttAction(action,data)
+{
+
+}
 exports.errorResponse = errorResponse;

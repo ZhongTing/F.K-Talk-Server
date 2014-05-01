@@ -2,6 +2,7 @@ var db = require("./db");
 var connection = db.connection;
 var user = require("./user");
 var common = require("./common");
+var mqtt = require("./fkmqtt");
 
 function addFriend(response, postData)
 {
@@ -10,11 +11,13 @@ function addFriend(response, postData)
 	{
 		var sql = "INSERT INTO friend (selfUid,friendUid) SELECT ?, uid FROM user WHERE phone = ?;";
 		var sql2 = "INSERT INTO friend (selfUid,friendUid) SELECT uid, ? FROM user WHERE phone = ?;";
+		var sql3 = "SELECT"
 		response.writeHead(200, {"Content-Type": "text/plain"});
-		if(error || result.length == 0)return common.errorResponse(response, "token error");
-		
+		// if(error || result.length == 0)return common.errorResponse(response, "token error");
+		if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
 		connection.beginTransaction(function(error){
-			if(error)return common.errorResponse(response, "add friend failed");
+			// if(error)return common.errorResponse(response, "add friend failed");
+			if(error)return mqtt.action(postData.sp,"error", "add freind failed");
 			insert(sql, [result[0].uid,postData.phone], function(){
 				insert(sql2, [result[0].uid,postData.phone], function(){
 					connection.commit(function(err) {
@@ -23,20 +26,24 @@ function addFriend(response, postData)
 								throw err;
 							});
 						}
-						response.write("{}");
 						response.end();
+						queryInfo("where uid = " + result[0].uid,function(error, result){
+							if(error)mqtt.action(postData.phone,"error", "get FriendInfo error");
+							mqtt.action(postData.phone,"updateFriend", result[0]);
+						})
+						queryInfo("where phone = "+postData.phone,function(error, result){
+							if(error)mqtt.action(postData.sp,"error", "get FriendInfo error");
+							mqtt.action(postData.sp,"updateFriend", result[0]);
+						})
 					});
 				})
 			});	
 		});
-
-		// insert(sql, [result[0].uid,postData.phone], function(){
-		// 	insert(sql2, [result[0].uid,postData.phone], function(){
-		// 		response.write("{}");
-		// 		response.end();
-		// 	})
-		// });
-
+		function queryInfo(whereSQL,callback)
+		{
+			var sql = "SELECT phone,photo,mail,unix_timestamp(now()) as timestamp, -1 as hasReadMsgId FROM `user`" + whereSQL;
+			connection.query(sql, callback);
+		}
 		function insert(sql, insertData, callback)
 		{
 			var errorMsg = "";
@@ -57,7 +64,8 @@ function addFriend(response, postData)
 				if(errorMsg)
 				{
 					return connection.rollback(function() {
-						common.errorResponse(response, errorMsg);
+						mqtt.action(postData.sp,"error", errorMsg);
+						// common.errorResponse(response, errorMsg);
 					});
 				}
 				callback();
@@ -71,15 +79,16 @@ function listFriend(response, postData)
 	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
-		var sql = "SELECT name, phone, photo, mail, UNIX_TIMESTAMP(readTime) as readTime from (SELECT uid, name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ? ) AS b ) AS c NATURAL JOIN user) as leftpart left JOIN friend on leftpart.uid = friend.selfUid and friend.friendUid = ?";
+		var sql = "SELECT name, phone, photo, mail, UNIX_TIMESTAMP(now()), hasReadMsgId as timestamp from (SELECT uid, name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ? ) AS b ) AS c NATURAL JOIN user) as leftpart left JOIN friend on leftpart.uid = friend.selfUid and friend.friendUid = ?";
 		response.writeHead(200, {"Content-Type": "text/plain"});
-		if(error || result.length == 0)return common.errorResponse(response, "token error");
+		// if(error || result.length == 0)return common.errorResponse(response, "token error");
+		if(error || result.length == 0)return mqtt.action(postData.sp, "error", "token error");
 		connection.query(sql,[postData.token,result[0].uid],function(error,results){
-			if (error) {
-				console.log(error);
-				return common.errorResponse(response, "listFriend failed");
-			};
-			response.write(JSON.stringify(results));
+			if (error) 
+				// throw error;
+				return mqtt.action(postData.sp, "error", "listFriend failed");
+			return mqtt.action(postData.sp, "listFriend", results);
+			// response.write(JSON.stringify(results));
 			response.end();
 		})
 	}
