@@ -103,6 +103,28 @@ function listFriend(response, postData)
 		})
 	}
 }
-
+function deleteFriend(response, postData)
+{
+	if(!postData.sp)
+	{
+		response.end();
+		return;
+	}
+	user.getUidByToken(postData.token,onGetUid);
+	function onGetUid(error, result)
+	{
+		var sql = "";
+		response.writeHead(200, {"Content-Type": "text/plain"});
+		if(error || result.length == 0)return mqtt.action(postData.sp, "error", "token error");
+		connection.query(sql,[result[0].uid],function(error,results){
+			if (error)return mqtt.action(postData.sp, "error", "deleteFriend failed");
+			
+			mqtt.action(postData.sp, "deleteFriend", results);
+			mqtt.action(postData.phone, "deleteFriend", results);
+			response.end();
+		})
+	}
+}
 exports.addFriend = addFriend;
 exports.listFriend = listFriend;
+exports.deleteFriend = deleteFriend;
