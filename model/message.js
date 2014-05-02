@@ -12,6 +12,7 @@ function sendMsg(response, postData)
         response.end();
         return;
     }
+    response.end();
     connection.beginTransaction(function(error)
     {
     	if(error)return  mqtt.action(postData.sp,"error","sendMsg failed")
@@ -66,7 +67,6 @@ function sendMsg(response, postData)
                     a.receiver = postData.phone;
                     mqtt.action(postData.sp,"addMsg",a);
                     mqtt.action(postData.phone,"addMsg",a);
-					response.end();
 				});
     		})
     	}
@@ -81,6 +81,7 @@ function readMsg(response, postData)
         response.end();
         return;
     }
+    response.end();
     user.getUidByToken(postData.token,onGetUid);
     function onGetUid(error, result)
     {
@@ -98,7 +99,6 @@ function readMsg(response, postData)
             a.phone = postData.sp;
             a.hasReadMsgId = postData.hasReadMsgId;
             mqtt.action(postData.phone,"hasRead",a);
-            response.end();
         })
     }
 }
@@ -137,11 +137,11 @@ function getFriendRead(response, postData)
 {
     var sql = "SELECT UNIX_TIMESTAMP(readTime) as readTime FROM friend WHERE friendUid IN ( SELECT uid FROM user WHERE token = ? ) AND selfUId IN ( SELECT uid FROM user WHERE phone =?)";
     var data = [postData.token,postData.phone];
+    response.end();
     connection.query(sql, data, function(error,result){
         if(error) mqtt.action(postData.sp,"error", error);
         if(result.length==0) return mqtt.action(postData.sp,"error", "get friend read failed");
         response.write(JSON.stringify(result[0]));
-        response.end();
     })
 }
 
