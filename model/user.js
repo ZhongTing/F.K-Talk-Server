@@ -82,16 +82,30 @@ function login(response, data)
     });
 }
 
-function uploadPhoto(response, postData)
+function setting(response, postData)
 {
-    console.log(postData.token);
-    console.log(postData.photo.length);
-    var sql = "UPDATE user SET photo = ? WHERE token = ? LIMIT 1 ; ";
-    connection.query(sql,[postData.photo,postData.token],function(error, results, fields){
+    var responseData = {};
+    if(postData.password)postData.password = bcrypt.hashSync(postData.password);
+    //token, photo, name, mail, password
+    var token = postData.token;
+    delete postData.token;
+    var sql = "UPDATE user SET ? WHERE token = '"+token+"' LIMIT 1 ; ";
+    connection.query(sql,postData,function(error, results, fields){
         response.writeHead(200, {"Content-Type": "text/plain"});
-        if(error)return common.errorResponse(response,"uploadPhoto failed");
-        response.write("{}");
-        response.end();
+        if(error||results.changedRows==0)
+        {
+            return common.errorResponse(response,"setting failed");
+        }
+        var sql2 = "SELECT photo, phone, name, mail, gcmRegId, token FROM user natural join gcm WHERE token = ?;";
+        console.log([token]);
+        connection.query(sql2, [token], function(error, result){
+            if(error||results.length==0)
+            {
+                return common.errorResponse(response,"setting failed");
+            }
+            response.write(JSON.stringify(result[0]));
+            response.end();
+        })
     });
 }
 
@@ -115,7 +129,7 @@ function getUidAndNameByToken(token, callback)
 
 exports.signup = signup;
 exports.login = login;
-exports.uploadPhoto = uploadPhoto;
+exports.setting = setting;
 exports.getUidByToken = getUidByToken;
 exports.getUidByPhone = getUidByPhone;
 exports.getUidAndNameByToken = getUidAndNameByToken;
