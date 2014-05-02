@@ -17,12 +17,13 @@ function sendMsg(response, postData)
     {
     	if(error)return  mqtt.action(postData.sp,"error","sendMsg failed")
     	if(postData.message=="")return mqtt.action(postData.sp,"error", "message empty")
-    	user.getUidByToken(postData.token,onGetUid);
-
+    	user.getUidAndNameByToken(postData.token,onGetUid);
+        var selfName;
     	function onGetUid(error, result)
     	{
     		if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
     		insertMsg(result[0].uid);
+            selfName = result[0].name;
     	}
     	function insertMsg(selfUid)
     	{
@@ -67,6 +68,10 @@ function sendMsg(response, postData)
                     a.receiver = postData.phone;
                     mqtt.action(postData.sp,"addMsg",a);
                     mqtt.action(postData.phone,"addMsg",a);
+                    var m = gcm.newMsg();
+                    var message = selfName + ":" + postData.message;
++                   m.addData("message", message);
+                    gcm.sendByPhone(postData.phone,m);
 				});
     		})
     	}
