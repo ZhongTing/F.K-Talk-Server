@@ -44,7 +44,7 @@ function addFriend(response, postData)
 		});
 		function queryInfo(whereSQL,callback)
 		{
-			var sql = "SELECT phone,photo,mail,unix_timestamp(now()) as timestamp, -1 as hasReadMsgId FROM `user`" + whereSQL;
+			var sql = "SELECT name,phone,photo,mail, -1 as hasReadMsgId FROM `user`" + whereSQL;
 			connection.query(sql, callback);
 		}
 		function insert(sql, insertData, callback)
