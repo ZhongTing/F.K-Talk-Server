@@ -40,7 +40,7 @@ function sendMsg(response, postData)
     	}
     	function queryTimeStamp(messageId)
     	{
-    		var sql = "SELECT UNIX_TIMESTAMP(now()) as timestamp , message, mid from message where mid = " + messageId;
+    		var sql = "SELECT UNIX_TIMESTAMP(now()) as timestamp , message, mid as messageId from message where mid = " + messageId;
     		if(error)
     		{
     			connection.rollback(function(){
