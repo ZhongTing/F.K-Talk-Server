@@ -86,7 +86,7 @@ function listFriend(response, postData)
 	user.getUidByToken(postData.token,onGetUid);
 	function onGetUid(error,result)
 	{
-		var sql = "SELECT name, phone, photo, mail, UNIX_TIMESTAMP(now()), hasReadMsgId as timestamp from (SELECT uid, name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ? ) AS b ) AS c NATURAL JOIN user) as leftpart left JOIN friend on leftpart.uid = friend.selfUid and friend.friendUid = ?";
+		var sql = "SELECT name, phone, photo, mail, UNIX_TIMESTAMP(now()) as timestamp, hasReadMsgId from (SELECT uid, name,phone,photo,mail FROM ( SELECT friendUid AS uid FROM  `friend`  NATURAL JOIN ( SELECT uid AS selfUid FROM user WHERE token = ? ) AS b ) AS c NATURAL JOIN user) as leftpart left JOIN friend on leftpart.uid = friend.selfUid and friend.friendUid = ?";
 		response.writeHead(200, {"Content-Type": "text/plain"});
 		response.end();
 		if(error || result.length == 0)return mqtt.action(postData.sp, "error", "token error");
