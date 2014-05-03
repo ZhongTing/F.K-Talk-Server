@@ -111,10 +111,10 @@ function readMsg(response, postData)
 //unuseless
 function listMsg(response, postData)
 {
-    var sql = "SELECT mid, name, phone, message, UNIX_TIMESTAMP(timestamp) as timestamp FROM `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID = ? and `senderUID` = ?) or (senderUID = ? and recieverUID = ?)) and timestamp > FROM_UNIXTIME( ? )"
-    var friendUid;
+    var sql = "SELECT user.phone AS reciever, temp.mid, message, temp.timestamp, sender FROM user, ( SELECT mid, senderUID, recieverUID, message, TIMESTAMP, phone AS sender FROM  `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID =? AND  `senderUID` =? ) OR ( senderUID =? AND recieverUID =? ) ) AND mid >? ORDER BY mid) AS temp WHERE temp.recieverUID = user.uid";    var friendUid;
     var selfUid;
     user.getUidByToken(postData.token,onGetUid);
+    response.end();
     function onGetUid(error, result)
     {
         if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
@@ -127,13 +127,12 @@ function listMsg(response, postData)
     }
     function queryMsgList()
     {
-        var data = [selfUid, friendUid, selfUid, friendUid, postData.timestamp];
-        console.log(data);
+        var mid = 0;
+        if(postData.mid)mid = postData.mid;
+        var data = [selfUid, friendUid, selfUid, friendUid, mid];
         connection.query(sql, data, function(error, result){
             if(error)return mqtt.action(postData.sp,"error", error);
-            // if(error)throw error
-            response.write(JSON.stringify(result));
-            response.end();
+            mqtt.action(postData.sp,"listMsg", result);
         })
     }
 }
