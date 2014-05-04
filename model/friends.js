@@ -138,7 +138,7 @@ function deleteFriend(response, postData)
 							}
 							response.end();
 							mqtt.action(postData.sp, "deleteFriend", {phone:postData.phone});
-							mqtt.action(postData.phone, "deleteFriend", {photo:postData.sp});
+							mqtt.action(postData.phone, "deleteFriend", {phone:postData.sp});
 						})
 					})
 				});	
