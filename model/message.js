@@ -111,7 +111,7 @@ function readMsg(response, postData)
 //unuseless
 function listMsg(response, postData)
 {
-    var sql = "SELECT user.phone AS receiver, temp.mid, message, temp.timestamp, sender FROM user, ( SELECT mid, senderUID, recieverUID, message, TIMESTAMP, phone AS sender FROM  `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID =? AND  `senderUID` =? ) OR ( senderUID =? AND recieverUID =? ) ) AND mid >? ORDER BY mid) AS temp WHERE temp.recieverUID = user.uid";    var friendUid;
+    var sql = "SELECT user.phone AS receiver, temp.mid AS messageId, message, temp.timestamp, sender FROM user, ( SELECT mid, senderUID, recieverUID, message, TIMESTAMP, phone AS sender FROM  `message` AS m INNER JOIN user ON m.senderUID = user.uid WHERE ((recieverUID =? AND  `senderUID` =? ) OR ( senderUID =? AND recieverUID =? ) ) AND mid >? ORDER BY mid) AS temp WHERE temp.recieverUID = user.uid";    var friendUid;
     var selfUid;
     user.getUidByToken(postData.token,onGetUid);
     response.end();
