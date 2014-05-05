@@ -132,6 +132,9 @@ function listMsg(response, postData)
         var data = [selfUid, friendUid, selfUid, friendUid, mid];
         connection.query(sql, data, function(error, result){
             if(error)return mqtt.action(postData.sp,"error", error);
+            var resultValue = {};
+            resultValue.phone = phone.sp;
+            resultValue.Msgs = result;
             mqtt.action(postData.sp,"listMsg", result);
         })
     }
