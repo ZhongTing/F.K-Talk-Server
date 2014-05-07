@@ -1,12 +1,12 @@
 var mqtt = require('mqtt')
-var client = mqtt.createClient(1883, '140.124.183.138');
+var client = mqtt.createClient(1883, '140.124.183.138', {clientId: "FKServer", clean: false});
 var prefix = "FK"
 var connectoin = require("./db").connectoin;
 var common = require("./common");
 
 function publish(topic, message)
 {
-	client.publish(prefix.concat(topic), message);
+	client.publish(prefix.concat(topic), message, {qos:1, retain:false});
 	console.log("mqtt---------");
 	console.log(prefix.concat(topic));
 	console.log(message);
