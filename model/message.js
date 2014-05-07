@@ -133,7 +133,7 @@ function listMsg(response, postData)
         connection.query(sql, data, function(error, result){
             if(error)return mqtt.action(postData.sp,"error", error);
             var resultValue = {};
-            resultValue.phone = phone.sp;
+            resultValue.phone = postData.sp;
             resultValue.Msgs = result;
             mqtt.action(postData.sp,"listMsg", result);
         })
