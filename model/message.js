@@ -139,20 +139,7 @@ function listMsg(response, postData)
         })
     }
 }
-//unuseless
-function getFriendRead(response, postData)
-{
-    var sql = "SELECT UNIX_TIMESTAMP(readTime) as readTime FROM friend WHERE friendUid IN ( SELECT uid FROM user WHERE token = ? ) AND selfUId IN ( SELECT uid FROM user WHERE phone =?)";
-    var data = [postData.token,postData.phone];
-    response.end();
-    connection.query(sql, data, function(error,result){
-        if(error) mqtt.action(postData.sp,"error", error);
-        if(result.length==0) return mqtt.action(postData.sp,"error", "get friend read failed");
-        response.write(JSON.stringify(result[0]));
-    })
-}
 
 exports.sendMsg = sendMsg;
 exports.readMsg = readMsg;
 exports.listMsg = listMsg;
-exports.getFriendRead = getFriendRead;
