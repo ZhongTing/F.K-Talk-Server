@@ -1,4 +1,3 @@
-// var gcm = require('node-gcm');
 var db = require('./db');
 var user = require('./user');
 var connection = db.connection;
@@ -18,11 +17,12 @@ function sendMsg(response, postData)
     	if(error)return  mqtt.action(postData.sp,"error","sendMsg failed")
     	if(postData.message=="")return mqtt.action(postData.sp,"error", "message empty")
     	user.getUidAndNameByToken(postData.token,onGetUid);
-        var selfName;
+        var selfName, selfUid;
     	function onGetUid(error, result)
     	{
     		if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
     		insertMsg(result[0].uid);
+            selfUid = result[0].uid;
             selfName = result[0].name;
     	}
     	function insertMsg(selfUid)
@@ -38,6 +38,7 @@ function sendMsg(response, postData)
 			{
 				return mqtt.action(postData.sp,"error", "phone not found");
 			}
+            addUnreadCounter(selfUid, postData.phone);
 			queryTimeStamp(result.insertId);
     	}
     	function queryTimeStamp(messageId)
@@ -66,8 +67,13 @@ function sendMsg(response, postData)
                     var a = result[0];
                     a.sender = postData.sp;
                     a.receiver = postData.phone;
-                    mqtt.action(postData.sp,"addMsg",a);
+                    var resultValue = {};
+                    resultValue.phone = postData.sp;
+                    resultValue.Msgs = a;
                     mqtt.action(postData.phone,"addMsg",a);
+                    resultValue.phone = postData.phone;
+                    mqtt.action(postData.sp,"addMsg",a);
+                    
                     var m = gcm.newMsg();
                     var message = selfName + ":" + postData.message;
 +                   m.addData("message", message);
@@ -75,6 +81,16 @@ function sendMsg(response, postData)
 				});
     		})
     	}
+        function addUnreadCounter(selfUid, phone)
+        {
+            var sql = "update friend inner join user on selfUid = uid set unreadCounter = unreadCounter +1 WHERE friendUid = ? and phone = ?";
+            connection.query(sql, [selfUid, phone], function(error, result){
+                if(!error&&result.affectedRows!=0)
+                {
+                    // mqtt.action(postData.phone,"error", "postData.sp");
+                }
+            })
+        }
     })
 }
 
@@ -92,6 +108,7 @@ function readMsg(response, postData)
     {
         if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
         updateReadMsg(result[0].uid);
+        resetUnreadCounter(result[0].uid,postData.phone);
     }
     function updateReadMsg(selfUid)
     {
@@ -104,6 +121,13 @@ function readMsg(response, postData)
             a.phone = postData.sp;
             a.hasReadMsgId = postData.hasReadMsgId;
             mqtt.action(postData.phone,"hasRead",a);
+        })
+    }
+    function resetUnreadCounter(selfUid, phone)
+    {
+        var sql = "update friend inner join user on friendUid = uid set unreadCounter = 0 WHERE selfUid = ? and phone = ?";
+        connection.query(sql, [selfUid, phone], function(error, result) {
+            //if(error||result.affectedRows==0)console.log(error)
         })
     }
 }
@@ -140,6 +164,23 @@ function listMsg(response, postData)
     }
 }
 
+function listCounter(response, postData)
+{
+    var sql = "SELECT phone, unreadCounter as counter FROM `friend` inner join user on friendUid = uid WHERE selfUid = ?";
+    var selfUid;
+    user.getUidByToken(postData.token,onGetUid);
+    response.end();
+    function onGetUid(error, result)
+    {
+        if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
+        selfUid = result[0].uid;
+        connection.query(sql,[selfUid],function(error, result){
+            if(error)return mqtt.action(postData.sp, "error", "listCounter Failed");
+            mqtt.action(postData.sp, "updateCounter", result);
+        });
+    }
+}
 exports.sendMsg = sendMsg;
 exports.readMsg = readMsg;
 exports.listMsg = listMsg;
+exports.listCounter = listCounter;

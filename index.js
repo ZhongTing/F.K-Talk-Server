@@ -16,7 +16,7 @@ handle["/listFriend"] = friend.listFriend;
 handle["/sendMsg"] = message.sendMsg;
 handle["/readMsg"] = message.readMsg;
 handle["/listMsg"] = message.listMsg;
-handle["/getFriendRead"] = message.getFriendRead;
+handle["/listCounter"] = message.listCounter;
 handle["/delFriend"] = friend.deleteFriend;
 
 var os=require('os');
