@@ -69,10 +69,10 @@ function sendMsg(response, postData)
                     a.receiver = postData.phone;
                     var resultValue = {};
                     resultValue.phone = postData.sp;
-                    resultValue.Msgs = a;
-                    mqtt.action(postData.phone,"addMsg",a);
+                    resultValue.Msg = a;
+                    mqtt.action(postData.phone,"addMsg",resultValue);
                     resultValue.phone = postData.phone;
-                    mqtt.action(postData.sp,"addMsg",a);
+                    mqtt.action(postData.sp,"addMsg",resultValue);
                     
                     var m = gcm.newMsg();
                     var message = selfName + ":" + postData.message;
@@ -157,9 +157,9 @@ function listMsg(response, postData)
         connection.query(sql, data, function(error, result){
             if(error)return mqtt.action(postData.sp,"error", error);
             var resultValue = {};
-            resultValue.phone = postData.sp;
+            resultValue.phone = postData.phone;
             resultValue.Msgs = result;
-            mqtt.action(postData.sp,"listMsg", result);
+            mqtt.action(postData.sp,"listMsg", resultValue);
         })
     }
 }
