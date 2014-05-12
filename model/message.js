@@ -70,6 +70,10 @@ function sendMsg(response, postData)
                     mqtt.action(postData.phone,"addMsg",a);
                     var m = gcm.newMsg();
                     var message = selfName + ":" + postData.message;
+                    var obj = message.match(/{&#&type&#&:(\d+),&#&data&#&:({.*}),&#&message&#&:&#&(.*)&#&}/);
+                    if(obj && obj[1] == 1){
+                        message = "傳送位置訊息";
+                    }
 +                   m.addData("message", message);
                     gcm.sendByPhone(postData.phone,m);
 				});
