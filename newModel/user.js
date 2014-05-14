@@ -8,23 +8,37 @@ var graph = require('fbgraph');
 
 function signup(response,data)
 {
-    var responseData = {};
-    if(data.type==type.FKTalk)
+    var insertData = {};
+    switch(data.type)
     {
-        data.password = bcrypt.hashSync(data.password);
+        case type.FKTalk:
+            data.password = bcrypt.hashSync(data.arg);
+            break;
+        case type.FB:
+            data.FBID = data.arg;
+            break;
+        case type.googleID:
+            data.googleID = data.arg;
+            break;
     }
     data.token = uuid.v1();
     gcmRegId = data.gcmRegId;
     delete data.gcmRegId;
-
+    delete data.arg;
+    delete data.type;
     connection.query('INSERT INTO user SET ?',data ,function(error, results, fields){
-        if(error)return FK.errorResponse(response,"signup failed");
+        if(error)
+        {
+            if(error.code=="ER_DUP_ENTRY")
+                return FK.errorResponse(response,"account exsit!");
+            else
+                return FK.errorResponse(response,"signup failed");
+        }
         var uid = results.insertId;
-        insertOrUpdateGCM(uid, data.gcmRegId);
+        insertOrUpdateGCM(uid, gcmRegId);
         response.writeHead(200, {"Content-Type": "text/plain"});
-        response.write(JSON.stringify(results[0]));
+        response.write("{}");
         response.end();
-        return common.errorResponse(response, "insert gcmRegId failed")
     });
 }
 
@@ -37,50 +51,74 @@ function login(response, data)
     {
         case type.FKTalk:
             sql += ' phone = ?';
-            sqlData[0] = data.phone;
+            sqlData[0] = data.arg.phone;
+            doLogin(sql, sqlData);
             break;
         case type.FB:
             sql += ' FBID = ?';
-            graph.setAccessToken(data.FBToken);
+            graph.setAccessToken(data.arg);
             graph.get("me?fields=id", function(err, res) {
                 sqlData[0] = res.id;
-            }
+                doLogin(sql, sqlData);
+            });
             break;
     }
-
-    connection.query(sql ,[data.phone], function(error, results, fields){
-        if(error)return FK.errorResponse(response,"login failed");
-        if(results.length!=0)
-        {
-            if(bcrypt.compareSync(data.password,results[0].password))
+    function doLogin(sql, sqlData)
+    {
+        connection.query(sql, sqlData, function(error, results){
+            if(error)return FK.errorResponse(response,"login failed");
+            if(results.length!=0)
             {
-                if(data.gcmRegId)
+                if(data.type==type.FKTalk && !bcrypt.compareSync(data.arg.password,results[0].password))
                 {
-                    insertOrUpdateGCM(results[0].uid, data.gcmRegId);
+                    return FK.errorResponse(response, "wrong password");
                 }
+                insertOrUpdateGCM(results[0].uid, data.gcmRegId);
                 delete results[0].uid;
                 delete results[0].password;
+                results[0].arg = data.arg;
+                results[0].type = data.type;
                 response.writeHead(200, {"Content-Type": "text/plain"});
                 response.write(JSON.stringify(results[0]));
                 response.end();
             }
-            else return common.errorResponse(response, "wrong password");
-        }
-        else return common.errorResponse(response, "phone not found");
-    });
+            else return FK.errorResponse(response, "account information not found");
+        });
+    }
 }
 
-function insertOrUpdateGCM(uid, gcmRegId)
+function bind(response, postData)
 {
-    var updateSQL = "UPDATE gcm AS g, ( SELECT gid FROM gcm WHERE uid = ? ) AS a SET gcmRegId = ? WHERE g.gid = a.gid";
-    var uid = results[0].uid;
-    connection.query(updateSQL, [results[0].uid,data.gcmRegId], function(error,results){
-        if(!error && results.affectedRows==0)
+    var sql = "SELECT token from user where ?? = ?";
+    var sqlData = [];
+    var typeSQL;
+    if(postData.type==type.FB)
+    {
+        typeSQL = "FBID"
+        sqlData[1] = postData.arg;
+    }
+    sqlData[0] = typeSQL;
+    connection.query(sql, sqlData, function(error, results){
+        if(error)return FK.errorResponse(response, "bind error");
+        if(results.length!=0)
         {
-            var insertData = {"gcmRegId":data.gcmRegId,"uid":uid};
-            connection.query("INSERT INTO gcm SET ?", insertData);
+            if(results[0].token==postData.token)
+            {
+                return FK.errorResponse(response, "account has binded before");
+            }
+            else return FK.errorResponse(response, "fb account has been used");
         }
-    });
+        console.log(results);
+        sqlData[2] = postData.token;
+        sql = "UPDATE user SET ?? = ? WHERE token = ?";
+        connection.query(sql, sqlData, function(error, results){
+            if(error || results.affectedRows == 0)
+                return FK.errorResponse(response, "bind failed");
+            response.writeHead(200, {"Content-Type": "text/plain"});
+            response.write("{}");
+            response.end();
+        })
+    })
 }
 
 function setting(response, postData)
@@ -92,21 +130,38 @@ function setting(response, postData)
     delete postData.token;
     var sql = "UPDATE user SET ? WHERE token = '"+token+"' LIMIT 1 ; ";
     connection.query(sql,postData,function(error, results, fields){
-        response.writeHead(200, {"Content-Type": "text/plain"});
         if(error||results.changedRows==0)
         {
             return common.errorResponse(response,"setting failed");
         }
-        var sql2 = "SELECT photo, phone, name, mail, gcmRegId, token FROM user natural join gcm WHERE token = ?;";
-        console.log([token]);
-        connection.query(sql2, [token], function(error, result){
-            if(error||results.length==0)
-            {
-                return common.errorResponse(response,"setting failed");
-            }
-            response.write(JSON.stringify(result[0]));
-            response.end();
-        })
+        response.writeHead(200, {"Content-Type": "text/plain"});
+        response.write("{}");
+        response.end();
+    });
+}
+
+function checkIsMember(response, postData)
+{
+    var sql = "SELECT phone FROM user WHERE phone = ?";
+    connection.query(sql, [postData.phone], function(error, results){
+        if(error)return FK.errorResponse(response, "check error");
+        var resultObj = {};
+        resultObj.result = results.length != 0;
+        response.writeHead(200, {"Content-Type": "text/plain"});
+        response.write(JSON.stringify(resultObj));
+        response.end();
+    })
+}
+function insertOrUpdateGCM(uid, gcmRegId)
+{
+    var updateSQL = "UPDATE gcm AS g, ( SELECT gid FROM gcm WHERE uid = ? ) AS a SET gcmRegId = ? WHERE g.gid = a.gid";
+    if(!gcmRegId)return;
+    connection.query(updateSQL, [uid, gcmRegId], function(error,results){
+        if(!error && results.affectedRows==0)
+        {
+            var insertData = {"gcmRegId":gcmRegId,"uid":uid};
+            connection.query("INSERT INTO gcm SET ?", insertData);
+        }
     });
 }
 
@@ -131,6 +186,9 @@ function getUidAndNameByToken(token, callback)
 exports.signup = signup;
 exports.login = login;
 exports.setting = setting;
+exports.bind = bind;
+exports.checkIsMember = checkIsMember;
+
 exports.getUidByToken = getUidByToken;
 exports.getUidByPhone = getUidByPhone;
 exports.getUidAndNameByToken = getUidAndNameByToken;

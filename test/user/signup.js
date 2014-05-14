@@ -1,16 +1,19 @@
 var http = require("http");
 
 var data = JSON.stringify({
-    phone : '1',
-    mail :　'gary',
-    photo : '2',
-    token : "6f0990f0-db63-11e3-b",
+    name : '謝宗廷',
+    mail : 'gary62107@gmail.com',
+    gcmRegId : '1234560',
+    photo : '1235345',
+    type : 0,
+    phone:"0987103180",
+    arg : '12345'
 });
 
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/setting',
+    path: '/signup',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -21,7 +24,7 @@ var options = {
 var req = http.request(options, function(res) {
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
-        console.log("body: " + chunk);
+        console.log(chunk);
     });
 });
 

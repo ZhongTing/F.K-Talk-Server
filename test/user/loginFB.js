@@ -1,16 +1,15 @@
 var http = require("http");
 
 var data = JSON.stringify({
-    phone : '1',
-    mail :　'gary',
-    photo : '2',
-    token : "6f0990f0-db63-11e3-b",
+    type: 1,
+    arg : 'CAACEdEose0cBAFRqAvk4EdCfpgRhZAunW4ptU3k3ZC7hWW27tnZAPZA1UJirvqScOPwZAzsZAalYYKI1tSBbRcmJPMePKvddGSWhLwV3f7hq99V8qU75PF7JRJswzc1T98Onqmn1fLkAeOKvAmJX1UeuPmZBvXmMoAmiInZB9ZAqR9Nr4YrvtbcrCwTfgTZAu9UEE2oBoHiduR6QZDZD',
+    gcmRegId : '12345630'
 });
 
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/setting',
+    path: '/login',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

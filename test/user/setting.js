@@ -5,6 +5,7 @@ var data = JSON.stringify({
     mail :　'gary',
     photo : '2',
     token : "6f0990f0-db63-11e3-b",
+    password : 1234
 });
 
 var options = {

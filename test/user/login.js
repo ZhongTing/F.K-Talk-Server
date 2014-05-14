@@ -1,16 +1,15 @@
 var http = require("http");
 
 var data = JSON.stringify({
-    phone : '1',
-    mail :　'gary',
-    photo : '2',
-    token : "6f0990f0-db63-11e3-b",
+    type: 0,
+    arg : {phone:'0987103180',password:'12345'},
+    gcmRegId : '12345630'
 });
 
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/setting',
+    path: '/login',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

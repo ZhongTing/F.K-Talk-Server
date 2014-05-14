@@ -1,16 +1,13 @@
 var http = require("http");
 
 var data = JSON.stringify({
-    phone : '1',
-    mail :　'gary',
-    photo : '2',
-    token : "6f0990f0-db63-11e3-b",
+    phone : '0987103180',
 });
 
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/setting',
+    path: '/checkIsMember',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
