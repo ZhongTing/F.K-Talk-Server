@@ -6,7 +6,8 @@
 	"node-gcm":"",
 	"bcrypt-nodejs":"",
 	"node-uuid":"",
-	"mysql":""
+	"mysql":"",
+	"fbgraph":""
  },
  "scripts": {"start": "node index.js"}
 }
