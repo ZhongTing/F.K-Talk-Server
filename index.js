@@ -2,7 +2,7 @@ var server = require("./server");
 var router = require("./router");
 
 var user = require("./newModel/user");
-// var friend = require("./model/friends");
+ var friend = require("./newModel/friends");
 // var message = require("./model/message");
 
 var handle = {}
@@ -11,7 +11,7 @@ handle["/signup"] = user.signup;
 handle["/setting"] = user.setting;
 handle["/bind"] = user.bind;
 handle["/checkIsMember"] = user.checkIsMember;
-// handle["/addFriend"] = friend.addFriend;
+handle["/addFriends"] = friend.addFriends;
 // handle["/listFriend"] = friend.listFriend;
 // handle["/sendMsg"] = message.sendMsg;
 // handle["/readMsg"] = message.readMsg;
