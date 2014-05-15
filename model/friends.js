@@ -17,8 +17,7 @@ function addFriend(response, postData)
 		var sql = "INSERT INTO friend (selfUid,friendUid) SELECT ?, uid FROM user WHERE phone = ?;";
 		var sql2 = "INSERT INTO friend (selfUid,friendUid) SELECT uid, ? FROM user WHERE phone = ?;";
 		var sql3 = "SELECT"
-		response.writeHead(200, {"Content-Type": "text/plain"});
-		response.end();
+		
 		if(error || result.length == 0)return mqtt.action(postData.sp,"error", "token error");
 		connection.beginTransaction(function(error){
 			if(error)return mqtt.action(postData.sp,"error", "add freind failed");
