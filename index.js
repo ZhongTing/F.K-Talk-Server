@@ -12,12 +12,13 @@ handle["/setting"] = user.setting;
 handle["/bind"] = user.bind;
 handle["/checkIsMember"] = user.checkIsMember;
 handle["/addFriends"] = friend.addFriends;
-// handle["/listFriend"] = friend.listFriend;
+handle["/listFriends"] = friend.listFriends;
+handle["/delFriend"] = friend.delFriend;
 // handle["/sendMsg"] = message.sendMsg;
 // handle["/readMsg"] = message.readMsg;
 // handle["/listMsg"] = message.listMsg;
 // handle["/listCounter"] = message.listCounter;
-// handle["/delFriend"] = friend.deleteFriend;
+
 
 var os=require('os');
 var ifaces=os.networkInterfaces();
