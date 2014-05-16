@@ -35,10 +35,11 @@ function signup(response,data)
                 return FK.errorResponse(response,"signup failed");
         }
         var uid = results.insertId;
-        insertOrUpdateGCM(uid, gcmRegId);
-        response.writeHead(200, {"Content-Type": "text/plain"});
-        response.write("{}");
-        response.end();
+        insertOrUpdateGCM(uid, gcmRegId, function(){
+            response.writeHead(200, {"Content-Type": "text/plain"});
+            response.write("{}");
+            response.end(); 
+        });
     });
 }
 
@@ -152,15 +153,21 @@ function checkIsMember(response, postData)
         response.end();
     })
 }
-function insertOrUpdateGCM(uid, gcmRegId)
+function insertOrUpdateGCM(uid, gcmRegId, callback)
 {
     var updateSQL = "UPDATE gcm AS g, ( SELECT gid FROM gcm WHERE uid = ? ) AS a SET gcmRegId = ? WHERE g.gid = a.gid";
-    if(!gcmRegId)return;
+    if(!gcmRegId)return callback();
     connection.query(updateSQL, [uid, gcmRegId], function(error,results){
         if(!error && results.affectedRows==0)
         {
             var insertData = {"gcmRegId":gcmRegId,"uid":uid};
-            connection.query("INSERT INTO gcm SET ?", insertData);
+            connection.query("INSERT INTO gcm SET ?", insertData, function(){
+                callback();
+            });
+        }
+        else
+        {
+            callback();
         }
     });
 }
