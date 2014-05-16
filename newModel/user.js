@@ -155,6 +155,8 @@ function checkIsMember(response, postData)
 }
 function insertOrUpdateGCM(uid, gcmRegId, callback)
 {
+    if(!callback)
+        callback = function(){};
     var updateSQL = "UPDATE gcm AS g, ( SELECT gid FROM gcm WHERE uid = ? ) AS a SET gcmRegId = ? WHERE g.gid = a.gid";
     if(!gcmRegId)return callback();
     connection.query(updateSQL, [uid, gcmRegId], function(error,results){
