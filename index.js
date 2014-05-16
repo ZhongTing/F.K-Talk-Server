@@ -2,8 +2,8 @@ var server = require("./server");
 var router = require("./router");
 
 var user = require("./newModel/user");
- var friend = require("./newModel/friends");
-// var message = require("./model/message");
+var friend = require("./newModel/friends");
+var message = require("./newModel/message");
 
 var handle = {}
 handle["/login"] = user.login;
@@ -14,10 +14,11 @@ handle["/checkIsMember"] = user.checkIsMember;
 handle["/addFriends"] = friend.addFriends;
 handle["/listFriends"] = friend.listFriends;
 handle["/delFriend"] = friend.delFriend;
-// handle["/sendMsg"] = message.sendMsg;
-// handle["/readMsg"] = message.readMsg;
-// handle["/listMsg"] = message.listMsg;
-// handle["/listCounter"] = message.listCounter;
+handle["/listCounter"] = message.listCounter;
+handle["/sendMsg"] = message.sendMsg;
+handle["/readMsg"] = message.readMsg;
+handle["/listMsg"] = message.listMsg;
+
 
 
 var os=require('os');

@@ -16,7 +16,7 @@ function sendByPhone(phone, msgObject, callback)
 	var sql = "SELECT `gcmRegId` FROM gcm natural join user where phone = ?"
     connection.query(sql, [phone], function(error, result){
         if(error)return console.log("sendGCM failed");
-        if(result.length == 0)return console.log("sendGCM phone not found");
+        if(result.length == 0)return console.log("sendGCM phone or gcmRegId not found");
         var id = result[0].gcmRegId;
         send(id, msgObject, callback);
     })
