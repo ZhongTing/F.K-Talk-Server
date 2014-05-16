@@ -167,10 +167,7 @@ function insertOrUpdateGCM(uid, gcmRegId, callback)
                 callback();
             });
         }
-        else
-        {
-            callback();
-        }
+        else callback();
     });
 }
 
