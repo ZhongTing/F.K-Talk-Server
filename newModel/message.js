@@ -54,6 +54,7 @@ function sendMsg(response, postData)
 				return mqtt.action(postData.token, "error", "sendMsg error");
 			var recieverToken = results[0].token;
 			var selfName = results[0].name;
+			var selfUID = results[0].senderUID;
 			delete results[0].name;
 			delete results[0].senderUID;
 			delete results[0].token;
@@ -65,9 +66,9 @@ function sendMsg(response, postData)
 			mqtt.action(recieverToken, "addMsg", data);
 
 			sendGCM(selfName, postData.message, postData.phone);
+			addUnreadCounter(selfUID, postData.phone);
 			response.end();
 		});
-		addUnreadCounter(postData.token, postData.phone);
 	})
 	function sendGCM(selfName, message, phone)
 	{
@@ -81,13 +82,14 @@ function sendMsg(response, postData)
 		m.addData("message", message);
 		gcm.sendByPhone(phone,m);
 	}
-	function addUnreadCounter(selfUid, phone)
+	function addUnreadCounter(selfUID, phone)
     {
         var sql = "update friend inner join user on selfUid = uid 	\
         	set unreadCounter = unreadCounter +1 					\
-        	WHERE friendUid = ? and phone = ?";
-        connection.query(sql, [selfUid, phone], function(error, result){
+        	WHERE phone = ? and friendUID = ?";
+        connection.query(sql, [phone, selfUID], function(error, result){
             if(error)console.log(error);
+            console.log(result);
         })
     }
 }
