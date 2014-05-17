@@ -43,7 +43,7 @@ function sendMsg(response, postData)
 		var sql = "\
 			SELECT f. * , user.phone AS sender, user.name		\
 			FROM (												\
-				SELECT mid, senderUID, phone AS reciever, token, message, UNIX_TIMESTAMP( TIMESTAMP ) AS TIMESTAMP\
+				SELECT mid AS messageId, senderUID, phone AS receiver, token, message, UNIX_TIMESTAMP( TIMESTAMP ) AS timestamp\
 				FROM message									\
 				INNER JOIN user ON recieverUID = uid 			\
 				WHERE mid = ? 									\
@@ -60,7 +60,7 @@ function sendMsg(response, postData)
 			delete results[0].token;
 			var data = {};
 			data.Msg = results[0];
-			data.phone = results[0].reciever;
+			data.phone = results[0].receiver;
 			mqtt.action(postData.token, "addMsg", data);
 			data.phone = results[0].sender;
 			mqtt.action(recieverToken, "addMsg", data);
