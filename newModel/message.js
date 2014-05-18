@@ -135,6 +135,23 @@ function readMsg(response, postData)
 function listMsg(response, postData)
 {
 
+	var sql = "select t.mid as messageId, phone as sender, t.reciever, t.message, UNIX_TIMESTAMP(t.timestamp) as timestamp \
+		from user,																						\
+		(select distinct message.*,phone as reciever 													\
+			from message inner join user on recieverUID = user.uid,										\
+			(select uid from user where phone = ?) as friend,											\
+			(select uid from user where token = ?) as self 												\
+			where (self.uid = message.senderUID and friend.uid = message.recieverUID)					\
+			or (self.uid = message.recieverUID and friend.uid = message.senderUID)) as t 				\
+		where t.senderUID = user.uid order by mid";
+	connection.query(sql, [postData.phone, postData.token], function(error, results){
+		if(error)return mqtt.action(postData.phone, "error", "listMsg error");
+		var data = {};
+		data.phone = postData.phone;
+		data.Msgs = results;
+		mqtt.action(postData.token, "listMsg", data);
+		response.end();
+	})
 }
 
 exports.listCounter = listCounter;
