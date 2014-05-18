@@ -3,7 +3,7 @@ var http = require("http");
 var data = JSON.stringify({
     token : 'acd04450-dc63-11e3-a',
     type : 0,
-    args : ['0987103181','123']
+    args : ['0987103181','123','0987103180','0961276368']
 });
 
 var options = {
