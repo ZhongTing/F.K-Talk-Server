@@ -15,11 +15,11 @@ function listCounter(response, postData)
 			FROM user							\
 			WHERE token = ?						\
 		)";
+	response.end();
 	connection.query(sql, [postData.token], function(error,result){
 		if(error)return mqtt.action(postData.token, "error", "list counter error");
 		mqtt.action(postData.token, "updateCounter", result);
-		response.end();
-	})
+	});
 }
 
 function sendMsg(response, postData)
@@ -37,6 +37,7 @@ function sendMsg(response, postData)
 			WHERE phone = ?										\
 		) AS c";
 	var sqlData = [postData.message, postData.token, postData.phone];
+	response.end();
 	connection.query(sql, sqlData, function(error, results){
 		if(error || results.affectedRows == 0)
 			return mqtt.action(postData.token, "error", "sendMsg error");
@@ -67,7 +68,6 @@ function sendMsg(response, postData)
 
 			sendGCM(selfName, postData.message, postData.phone);
 			addUnreadCounter(selfUID, postData.phone);
-			response.end();
 		});
 	})
 	function sendGCM(selfName, message, phone)
@@ -96,9 +96,9 @@ function sendMsg(response, postData)
 
 function readMsg(response, postData)
 {
+	response.end();
 	updateHasReadMsgId();
 	resetUnReadCounter();
-	response.end();
 
 	function updateHasReadMsgId()
 	{
@@ -144,14 +144,14 @@ function listMsg(response, postData)
 			where (self.uid = message.senderUID and friend.uid = message.recieverUID)					\
 			or (self.uid = message.recieverUID and friend.uid = message.senderUID)) as t 				\
 		where t.senderUID = user.uid order by mid";
+	response.end();
 	connection.query(sql, [postData.phone, postData.token], function(error, results){
 		if(error)return mqtt.action(postData.phone, "error", "listMsg error");
 		var data = {};
 		data.phone = postData.phone;
 		data.Msgs = results;
 		mqtt.action(postData.token, "listMsg", data);
-		response.end();
-	})
+	});
 }
 
 exports.listCounter = listCounter;
