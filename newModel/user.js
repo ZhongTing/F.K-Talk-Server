@@ -131,7 +131,6 @@ function setting(response, postData)
     var sql = "UPDATE user SET ? WHERE token = '"+token+"' LIMIT 1 ; ";
     connection.query(sql,{
         photo: postData.photo,
-        phone: postData.phone,
         name: postData.name,
         mail: postData.mail,
         password: postData.password,
