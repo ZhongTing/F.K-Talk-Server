@@ -45,7 +45,7 @@ function signup(response,data)
 function login(response, data)
 {
     var responseData = {};
-    var sql = 'SELECT uid, name, phone, mail, token, photo, password FROM user WHERE';
+    var sql = 'SELECT uid, name, phone, mail, token, photo, password, FBID FROM user WHERE';
     var sqlData = [];
     switch(data.type)
     {
@@ -129,10 +129,17 @@ function setting(response, postData)
     var token = postData.token;
     delete postData.token;
     var sql = "UPDATE user SET ? WHERE token = '"+token+"' LIMIT 1 ; ";
-    connection.query(sql,postData,function(error, results, fields){
+    connection.query(sql,{
+        photo: postData.photo,
+        phone: postData.phone,
+        name: postData.name,
+        mail: postData.mail,
+        password: postData.password,
+    },function(error, results, fields){
         if(error||results.changedRows==0)
         {
-            return common.errorResponse(response,"setting failed");
+            console.log(error);
+            return FK.errorResponse(response,"setting failed");
         }
         response.writeHead(200, {"Content-Type": "text/plain"});
         response.write("{}");
