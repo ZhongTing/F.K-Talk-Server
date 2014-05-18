@@ -96,7 +96,40 @@ function sendMsg(response, postData)
 
 function readMsg(response, postData)
 {
+	updateHasReadMsgId();
+	resetUnReadCounter();
+	response.end();
 
+	function updateHasReadMsgId()
+	{
+		var sql = "UPDATE friend,							\
+			(SELECT uid FROM user WHERE phone = ?) AS user,	\
+			(SELECT uid FROM user WHERE token = ?) AS self	\
+			SET hasReadMsgId = ? 							\
+			WHERE selfUid = self.uid AND friendUid = user.uid";
+		var sqlData = [postData.phone, postData.token, postData.hasReadMsgId];
+		connection.query(sql, sqlData, function(error, results){
+			if(error || results.changedRows==0)
+			{
+				console.log(error);
+				return mqtt.action(postData.token, "error", "update hasReadMsgId failed");
+			}
+			return mqtt.action(postData.token, "hasRead", {"phone":postData.phone, "hasReadMsgId":postData.hasReadMsgId});
+		});
+	}
+	function resetUnReadCounter()
+	{
+		var sql = "UPDATE friend INNER JOIN user ON friendUid = uid,	\
+			(SELECT uid FROM user WHERE token = ?) AS self 				\
+			SET unreadCounter = 0 										\
+			WHERE selfUid = self.uid AND phone = ?";
+        connection.query(sql, [postData.token, postData.phone], function(error, result) {
+            if(error || result.affectedRows == 0)
+            {
+            	return mqtt.action(postData.token, "error", "resetUnReadCounter failed");
+            }
+        })
+	}
 }
  
 function listMsg(response, postData)
