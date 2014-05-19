@@ -4,42 +4,45 @@ var mqtt = require('./fkmqtt');
 var gcm = require('./gcmService');
 
 function addFriends(response, postData){
-	var sql = "select uid, token, name, phone, photo, mail, -1 as hasReadMsgId from user where ";
-	var keyword = "phone = ";
-	if(postData.type==FK.type.FB)keyword = "FBID = ";
-	for(var i in postData.args)
-	{
-		sql += keyword + postData.args[i] + "||";
-	}
-	sql += "marker"
-	sql = sql.replace("||marker","");
+	
+	var sql = "select user.uid, token, name, phone, photo, mail, -1 as hasReadMsgId from user,	\
+			(select uid, name as selfUID from user where token = ?) as self 					\
+			where (self.uid, user.uid) not in (select selfUID, friendUID from friend) 			\
+			and self.uid != user.uid and ";
+	var keyword = "phone";
+	if(postData.t == FK.type.FB)keyword = "FBID";
+	var condition = JSON.stringify(postData.args).replace('[','(').replace(']',')');
+	sql += keyword + ' in ' + condition;
 	response.end();
-	var querySelfSQL = "SELECT uid, name, phone, photo, mail, -1 as hasReadMsgId FROM user where token = ?";
-	connection.query(querySelfSQL, postData.token, function(err, selfInfos){
-		if(err || selfInfos.length==0)return mqtt.action(postData.token, "error", "token error");
-		var uid = selfInfos[0].uid;
-		connection.query(sql, [], function(error, friendInfos) {
-		 	if(error)return mqtt.action(postData.token, "error", "addFriends failed");
-		 	var data = [];
+
+	connection.query(sql, [postData.token], function(error, friendInfos){
+		if(error)
+		{
+			console.log(error);
+			return mqtt.action(postData.token, "error", "addFriends error");
+		}
+		if(friendInfos.length == 0)
+		{
+			return mqtt.action(postData.token, "error", "valid user list is empty");
+		}
+		var querySelfSQL = "SELECT uid, name, phone, photo, mail, -1 as hasReadMsgId FROM user where token = ?";
+		connection.query(querySelfSQL, [postData.token], function(error, selfInfos){
+			if(error)return mqtt.action(postData.token, "error", "addFriends error");
+			var data = [];
 		 	for(var i in friendInfos)
 		 	{
 		 		var element = [];
 		 		element[0] = friendInfos[i].uid;
-		 		element[1] = uid;
+		 		element[1] = selfInfos[0].uid;
 		 		data.push(element);
 		 		data.push(element.slice(0).reverse());
 		 	}
-		 	connection.query("insert into friend (selfUID,friendUID) values ?", [data],function(error, insertResults){
-		 		if(error)
-		 		{
-		 			if(error.code=="ER_DUP_ENTRY")
-						return mqtt.action(postData.token, "error","friend exsit!");
-					else
-						return mqtt.action(postData.token, "error","addFriends failed");
-		 		}
+		 	var insertSql = "insert into friend (selfUID,friendUID) values ?";
+		 	connection.query(insertSql, [data], function(error, insertResults){
+		 		if(error)return mqtt.action(postData.token, "error","addFriends failed");
 		 		for(var i in friendInfos)
 		 		{
-		 			mqtt.action(friendInfos[i].token, "updateFriends", selfInfos[0]);
+		 			mqtt.action(friendInfos[i].token, "updateFriends", [selfInfos[0]]);
 		 			var m = gcm.newMsg();
 					var message = selfInfos[0].name + "已經成為你的好友";
 					m.addData("message", message);
@@ -47,8 +50,43 @@ function addFriends(response, postData){
 		 		}
 		 		mqtt.action(postData.token, "updateFriends", friendInfos);
 		 	})
-		});
-	});
+		})
+	})
+	// var querySelfSQL = "SELECT uid, name, phone, photo, mail, -1 as hasReadMsgId FROM user where token = ?";
+	// connection.query(querySelfSQL, postData.token, function(err, selfInfos){
+	// 	if(err || selfInfos.length==0)return mqtt.action(postData.token, "error", "token error");
+	// 	var uid = selfInfos[0].uid;
+	// 	connection.query(sql, [], function(error, friendInfos) {
+	// 	 	if(error)return mqtt.action(postData.token, "error", "addFriends failed");
+	// 	 	var data = [];
+	// 	 	for(var i in friendInfos)
+	// 	 	{
+	// 	 		var element = [];
+	// 	 		element[0] = friendInfos[i].uid;
+	// 	 		element[1] = uid;
+	// 	 		data.push(element);
+	// 	 		data.push(element.slice(0).reverse());
+	// 	 	}
+	// 	 	connection.query("insert into friend (selfUID,friendUID) values ?", [data],function(error, insertResults){
+	// 	 		if(error)
+	// 	 		{
+	// 	 			if(error.code=="ER_DUP_ENTRY")
+	// 					return mqtt.action(postData.token, "error","friend exsit!");
+	// 				else
+	// 					return mqtt.action(postData.token, "error","addFriends failed");
+	// 	 		}
+	// 	 		for(var i in friendInfos)
+	// 	 		{
+	// 	 			mqtt.action(friendInfos[i].token, "updateFriends", selfInfos[0]);
+	// 	 			var m = gcm.newMsg();
+	// 				var message = selfInfos[0].name + "已經成為你的好友";
+	// 				m.addData("message", message);
+	// 				gcm.sendByPhone(friendInfos[i].phone,m);
+	// 	 		}
+	// 	 		mqtt.action(postData.token, "updateFriends", friendInfos);
+	// 	 	})
+	// 	});
+	// });
 }
 
 function listFriends(response, postData){
