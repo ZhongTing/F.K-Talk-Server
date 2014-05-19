@@ -1,13 +1,16 @@
 {
- "name": "fktalk-server",
- "version": "0.0.1",
- "private": true,
- "dependencies": {
-	"node-gcm":"",
-	"bcrypt-nodejs":"",
-	"node-uuid":"",
-	"mysql":"",
-	"fbgraph":""
- },
- "scripts": {"start": "node index.js"}
+	"name": "fktalk-server",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"node-gcm": "0.9.11",
+		"bcrypt-nodejs": "0.0.3",
+		"node-uuid": "1.4.1",
+		"mysql": "2.3.0",
+		"fbgraph": "0.2.10",
+		"mqtt": "0.3.8"
+	},
+	"scripts": {
+		"start": "node index.js"
+	}
 }
