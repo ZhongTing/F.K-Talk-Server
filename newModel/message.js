@@ -114,7 +114,12 @@ function readMsg(response, postData)
 				console.log(error);
 				return mqtt.action(postData.token, "error", "update hasReadMsgId failed");
 			}
-			return mqtt.action(postData.token, "hasRead", {"phone":postData.phone, "hasReadMsgId":postData.hasReadMsgId});
+			sql = "select * from 									\
+				(select phone from user where token = ?) as self,	\
+				(select token from user where phone = ?) as friend";
+			connection.query(sql, [postData.token, postData.phone], function(error, result){
+				return mqtt.action(result[0].token, "hasRead", {"phone":result[0].phone, "hasReadMsgId":postData.hasReadMsgId});
+			})
 		});
 	}
 	function resetUnReadCounter()
