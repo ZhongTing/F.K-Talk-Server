@@ -25,14 +25,14 @@ function listCounter(response, postData)
 function sendMsg(response, postData)
 {
 	var sql = "\
-		INSERT INTO message( senderUID, recieverUID, message )	\
+		INSERT INTO message( senderUID, receiverUID, message )	\
 		SELECT * ,  ? AS message								\
 		FROM (													\
 			SELECT uid AS senderUID								\
 			FROM user											\
 			WHERE token = ?										\
 		) AS a, (												\
-			SELECT uid AS recieverUID							\
+			SELECT uid AS receiverUID							\
 			FROM user											\
 			WHERE phone = ?										\
 		) AS c";
@@ -46,14 +46,14 @@ function sendMsg(response, postData)
 			FROM (												\
 				SELECT mid AS messageId, senderUID, phone AS receiver, token, message, UNIX_TIMESTAMP( TIMESTAMP ) AS timestamp\
 				FROM message									\
-				INNER JOIN user ON recieverUID = uid 			\
+				INNER JOIN user ON receiverUID = uid 			\
 				WHERE mid = ? 									\
 			) AS f, user										\
 			WHERE user.uid = f.senderUID";
 		connection.query(sql, [results.insertId], function(error, results){
 			if(error || results.length == 0)
 				return mqtt.action(postData.token, "error", "sendMsg error");
-			var recieverToken = results[0].token;
+			var receiverToken = results[0].token;
 			var selfName = results[0].name;
 			var selfUID = results[0].senderUID;
 			delete results[0].name;
@@ -64,7 +64,7 @@ function sendMsg(response, postData)
 			data.phone = results[0].receiver;
 			mqtt.action(postData.token, "addMsg", data);
 			data.phone = results[0].sender;
-			mqtt.action(recieverToken, "addMsg", data);
+			mqtt.action(receiverToken, "addMsg", data);
 
 			sendGCM(selfName, postData.message, postData.phone);
 			addUnreadCounter(selfUID, postData.phone);
@@ -140,14 +140,14 @@ function readMsg(response, postData)
 function listMsg(response, postData)
 {
 
-	var sql = "select t.mid as messageId, phone as sender, t.reciever, t.message, UNIX_TIMESTAMP(t.timestamp) as timestamp \
+	var sql = "select t.mid as messageId, phone as sender, t.receiver, t.message, UNIX_TIMESTAMP(t.timestamp) as timestamp \
 		from user,																						\
-		(select distinct message.*,phone as reciever 													\
-			from message inner join user on recieverUID = user.uid,										\
+		(select distinct message.*,phone as receiver 													\
+			from message inner join user on receiverUID = user.uid,										\
 			(select uid from user where phone = ?) as friend,											\
 			(select uid from user where token = ?) as self 												\
-			where (self.uid = message.senderUID and friend.uid = message.recieverUID)					\
-			or (self.uid = message.recieverUID and friend.uid = message.senderUID)) as t 				\
+			where (self.uid = message.senderUID and friend.uid = message.receiverUID)					\
+			or (self.uid = message.receiverUID and friend.uid = message.senderUID)) as t 				\
 		where t.senderUID = user.uid order by mid";
 	response.end();
 	connection.query(sql, [postData.phone, postData.token], function(error, results){
