@@ -1,15 +1,15 @@
 var http = require("http");
 
 var data = JSON.stringify({
+    token : '15d28300-dea3-11e3-b',
     type : 2,
-    arg : '100000255741179',
-    token : 'acd04450-dc63-11e3-a'
+    args : ['100000255741179']
 });
 
 var options = {
     host: 'localhost',
     port: 8888,
-    path: '/bind',
+    path: '/addFriends',
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -20,7 +20,7 @@ var options = {
 var req = http.request(options, function(res) {
     res.setEncoding('utf8');
     res.on('data', function (chunk) {
-        console.log(chunk);
+        console.log("body: " + chunk);
     });
 });
 

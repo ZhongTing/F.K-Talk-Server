@@ -10,7 +10,8 @@ function addFriends(response, postData){
 			where (self.uid, user.uid) not in (select selfUID, friendUID from friend) 			\
 			and self.uid != user.uid and ";
 	var keyword = "phone";
-	if(postData.t == FK.type.FB)keyword = "FBID";
+	if(postData.type == FK.type.FB)keyword = "FBID";
+	else if(postData.type == FK.type.Google)keyword = "googleID";
 	var condition = JSON.stringify(postData.args).replace('[','(').replace(']',')');
 	sql += keyword + ' in ' + condition;
 	response.end();

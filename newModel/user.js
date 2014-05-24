@@ -17,7 +17,7 @@ function signup(response,data)
         case type.FB:
             data.FBID = data.arg;
             break;
-        case type.googleID:
+        case type.Google:
             data.googleID = data.arg;
             break;
     }
@@ -62,6 +62,8 @@ function login(response, data)
                 doLogin(sql, sqlData);
             });
             break;
+        case type.googleID:
+
     }
     function doLogin(sql, sqlData)
     {
@@ -94,10 +96,14 @@ function bind(response, postData)
     var typeSQL;
     if(postData.type==type.FB)
     {
-        typeSQL = "FBID"
-        sqlData[1] = postData.arg;
+        typeSQL = "FBID";
+    }
+    else if(postData.type==type.Google)
+    {
+        typeSQL = "googleID";
     }
     sqlData[0] = typeSQL;
+    sqlData[1] = postData.arg;
     connection.query(sql, sqlData, function(error, results){
         if(error)return FK.errorResponse(response, "bind error");
         if(results.length!=0)
