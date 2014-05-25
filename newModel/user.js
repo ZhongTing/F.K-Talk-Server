@@ -62,8 +62,14 @@ function login(response, data)
                 doLogin(sql, sqlData);
             });
             break;
-        case type.googleID:
-
+        case type.Google:
+            sql += ' googleID = ?';
+            FK.getGoogleId(data.arg,function(id){
+                console.log(id);
+                sqlData[0] = id;
+                doLogin(sql, sqlData);
+            })
+            break;
     }
     function doLogin(sql, sqlData)
     {
